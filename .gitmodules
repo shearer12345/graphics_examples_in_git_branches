@@ -1,0 +1,3 @@
+[submodule "graphics_dependencies"]
+	path = graphics_dependencies
+	url = git@github.com:shearer12345/graphics_dependencies.git
