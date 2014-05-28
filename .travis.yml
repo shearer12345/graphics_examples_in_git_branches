@@ -4,7 +4,8 @@ compiler:
   - gcc
  
 before_install:
-  - sudo add-apt-repository --yes ppa:codegear/release
+  - sudo add-apt-repository --yes "ppa:codegear/release"
+  - grep ^ /etc/apt/sources.list /etc/apt/sources.list.d/* | grep codegear
   - sudo apt-get --yes install premake4
   
 before_script:
