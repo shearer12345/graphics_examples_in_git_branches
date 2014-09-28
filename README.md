@@ -38,12 +38,12 @@ cd graphics_examples_in_git_branches
 
 ###pull and update all branches
 ```bash
-for remote in `git branch -r `; do git branch --track $remote; done
+for remote in `git branch -r `; do git branch --track ${remote#origin/}; done
 ```
 
 ###to update existing branches
 ```bash
-for remote in `git branch -r `; do git checkout $remote ; git pull; done
+for remote in `git branch -r `; do git checkout ${remote#origin/} ; git pull; done
 ```
 
 ###Check which branches are local
