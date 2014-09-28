@@ -46,6 +46,11 @@ for remote in `git branch -r `; do git branch --track $remote; done
 for remote in `git branch -r `; do git checkout $remote ; git pull; done
 ```
 
+###Check which branches are local
+```bash
+git branch -l
+```
+
 ##Usage
 
 - For each example, you'll need to check out its branch
