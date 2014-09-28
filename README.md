@@ -27,6 +27,7 @@
     - on Linux, just use bash (or another shell)
 
 ###Clone
+```bash
 git clone --recursive https://github.com/shearer12345/graphics_examples_in_git_branches.git
 ```
 
