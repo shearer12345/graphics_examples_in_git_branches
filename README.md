@@ -22,9 +22,9 @@
   
 ##Getting the code
 
-- you'll need to recursively clone to repository, then make sure you pull all the branches and tags locally
-    - on Windows, start Git Shell, then type bash to start bash
-    - on Linux, just use bash (or another shell)
+- you'll need to recursively clone to repository, then run the `branchAndTrack.py` script to pull all the branches locally and track them
+    - on Windows, start Git Shell
+    - on Linux, use any shell
 
 ###Clone
 ```bash
@@ -36,14 +36,9 @@ git clone --recursive https://github.com/shearer12345/graphics_examples_in_git_b
 cd graphics_examples_in_git_branches
 ```
 
-###pull and update all branches
+###pull and track all branches
 ```bash
-for remote in `git branch -r `; do git branch --track ${remote#origin/}; done
-```
-
-###to update existing branches
-```bash
-for remote in `git branch -r `; do git checkout ${remote#origin/} ; git pull; done
+python branchAndTrack.py
 ```
 
 ###Check which branches are local
