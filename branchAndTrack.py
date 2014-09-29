@@ -7,6 +7,9 @@ if sys.version_info < (3, 0):
 
 import subprocess
 
+#checkout master
+subprocess.check_call('git checkout master')
+
 #Get remotes string and local string from git
 remotesString = subprocess.check_output('git branch -r', shell=True, universal_newlines=True)
 localsString = subprocess.check_output('git branch -l', shell=True, universal_newlines=True)
