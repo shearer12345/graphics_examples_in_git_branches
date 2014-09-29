@@ -7,6 +7,7 @@
 ##Branches available (order of age-ish)
 
 - master (working point)
+- sdlCreateContext
 - sdlCreateWindow
 - sdlInitialise
 - sdlIncludeAndLink
