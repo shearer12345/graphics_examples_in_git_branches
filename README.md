@@ -21,7 +21,7 @@
 - premake4 (already in the repository for Windows)
 - a build environment
     - Linux:
-        - ```sudo apt-get install build-essential```
+        - ```sudo apt-get install build-essential premake4```
     - Windows:
         - Visual Studio, or something else of your choice
   
