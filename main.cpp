@@ -35,8 +35,35 @@ int main( int argc, char* args[] )
 		return 1;
 	}
 
+	SDL_Surface *bmp = SDL_LoadBMP("assets/hello.bmp");
+	if (bmp == nullptr){
+		SDL_DestroyRenderer(ren);
+		SDL_DestroyWindow(win);
+		std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
+		SDL_Quit();
+		return 1;
+	}
+
+
+	SDL_Texture *tex = SDL_CreateTextureFromSurface(ren, bmp);
+	SDL_FreeSurface(bmp);
+	if (tex == nullptr){
+		SDL_DestroyRenderer(ren);
+		SDL_DestroyWindow(win);
+		std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
+		SDL_Quit();
+		return 1;
+	}
+
+	SDL_RenderClear(ren);
+	SDL_RenderCopy(ren, tex, NULL, NULL);
+	SDL_RenderPresent(ren);
+
+
 	SDL_Delay(2000); //Wait for 2 seconds before exiting
 
+	
+	SDL_DestroyTexture(tex);
 	SDL_DestroyRenderer(ren);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
