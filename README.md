@@ -42,6 +42,7 @@ python branchAndTrack.py
 ```
 
 - *Note: If python is not in your path, you may need to install it, reference it directly, or add it to your path*
+     - it may be called `py.exe` on your system (if a Lincoln Student in Lab A), so try `py branchAndTrack.py`
      - install from https://www.python.org/
      - reference it directly (Windows)  - `C:\Python34\python.exe .\branchAndTrack.py`
      - add to your, or the system environment variable `PATH`
