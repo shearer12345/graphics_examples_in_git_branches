@@ -41,6 +41,11 @@ cd graphics_examples_in_git_branches
 python branchAndTrack.py
 ```
 
+- *Note: If python is not in your path, you may need to install it, reference it directly, or add it to your path*
+     - install from https://www.python.org/
+     - reference it directly (Windows)  - `C:\Python34\python.exe .\branchAndTrack.py`
+     - add to your, or the system environment variable `PATH`
+
 ###Check which branches are local
 ```bash
 git branch -l
@@ -54,12 +59,14 @@ git branch -l
 - the cpp main function is consistently in the file main.cpp
 
 - run premake4 to build the build files for your platform / build tool of choice
-  - e.g. "premake4 gmake"  or "premake4 vs2010"
+    - on Windows, you'll need to use premake4.bat
+    - Linux example: `premake4 gmake` or `premake4 vs2010` (you can build the VS solution on Linux!)
+    - Windows example: `premake4.bat vs2012`
 
 - build using your tool of choice
-  - e.g. "make", or load in visual studio and build
+    - e.g. `make`, or load the solution in visual studio and build
   
-- run the create exe (named after the branch)
-  - e.g. "./baseBuildWithNoFeatures.exe"
-  - or from Visual Studio
+- run the created exe (named after the branch)
+    - e.g. `./baseBuildWithNoFeatures.exe`
+    - or from Visual Studio
   
