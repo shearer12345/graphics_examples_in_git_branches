@@ -4,11 +4,12 @@
 
 - Build Status of master branch - ![masterBranchBuildStatus](https://travis-ci.org/shearer12345/graphics_examples_in_git_branches.svg?branch=master)
 
-##Branches available
+##Branches available (order of age-ish)
 
-- baseBuildWithNoFeatures
+- master (working point)
+- sdlIncludeAndLink
 - baseBuildWithNoFeaturesWithTravisTesting
-- master 
+- baseBuildWithNoFeatures
 
 ##Dependencies
 
