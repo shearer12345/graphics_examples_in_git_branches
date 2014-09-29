@@ -19,9 +19,10 @@
 
 - git
 - premake4 (already in the repository for Windows)
+- libsdl2
 - a build environment
     - Linux:
-        - ```sudo apt-get install build-essential premake4```
+        - ```sudo apt-get install build-essential premake4 libsdl2-dev```
     - Windows:
         - Visual Studio, or something else of your choice
   
