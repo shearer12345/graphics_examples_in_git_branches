@@ -11,7 +11,18 @@ int main( int argc, char* args[] )
 		cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
 		return 1;
 	}
-
 	cout << "SDL initialised OK!\n";
-    return 0;
+    
+	SDL_Window *win = SDL_CreateWindow("Hello World!", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
+	if (win == nullptr)
+	{
+		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+		SDL_Quit();
+		return 1;
+	}
+	cout << "SDL CreatedWindow OK!\n";
+    
+	SDL_Delay(2000); //Wait for 2 seconds before exiting
+
+	return 0;
 }
