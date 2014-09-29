@@ -13,10 +13,19 @@ solution "graphicsExamplesInGitBranches"
       buildoptions "-std=c++11" --http://industriousone.com/topic/xcode4-c11-build-option
 
       files { "**.h", "**.cpp" }
+
+      -- where are header files?
+      includedirs { "./graphics_dependencies/SDL2-2.0.3/include" }
+
+      -- what libraries need linking to
+      links { "SDL2", "SDL2main" }
+
+      -- where are libraries? 
+      libdirs { "./graphics_dependencies/SDL2-2.0.3/lib/x86" }
  
       configuration "Debug"
          defines { "DEBUG" }
-         flags { "Symbols" }
+         --flags { "Symbols" }
          targetsuffix "-debug"
  
       configuration "Release"
