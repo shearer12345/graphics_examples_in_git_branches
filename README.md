@@ -7,6 +7,7 @@
 ##Branches available (order of age-ish)
 
 - master (working point)
+- sdlInitialise
 - sdlIncludeAndLink
 - baseBuildWithNoFeaturesWithTravisTesting
 - baseBuildWithNoFeatures
