@@ -4,6 +4,10 @@
 
 - Build Status of master branch - ![masterBranchBuildStatus](https://travis-ci.org/shearer12345/graphics_examples_in_git_branches.svg?branch=master)
 
+```bash
+git clone --recursive https://github.com/shearer12345/graphics_examples_in_git_branches.git
+```
+
 ##Branches available (order of age-ish)
 
 - master (working point)
@@ -46,6 +50,10 @@ cd graphics_examples_in_git_branches
 ```bash
 python branchAndTrack.py
 ```
+or
+```bash
+py branchAndTrack.py
+```
 
 - *Note: If python is not in your path, you may need to install it, reference it directly, or add it to your path*
      - it may be called `py.exe` on your system (if a Lincoln Student in Lab A), so try `py branchAndTrack.py`
@@ -68,12 +76,12 @@ git branch -l
 - run premake4 to build the build files for your platform / build tool of choice
     - on Windows, you'll need to use premake4.bat
     - Linux example: `premake4 gmake` or `premake4 vs2010` (you can build the VS solution on Linux!)
-    - Windows example: `premake4.bat vs2012`
+    - Windows example: `.\premake4.bat vs2012` #**note the `.\`
 
 - build using your tool of choice
     - e.g. `make`, or load the solution in visual studio and build
   
 - run the created exe (named after the branch)
-    - e.g. `./baseBuildWithNoFeatures.exe`
+    - Linux: `./baseBuildWithNoFeatures.exe`
     - or from Visual Studio
   
