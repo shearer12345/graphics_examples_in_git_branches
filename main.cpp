@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <SDL.h>
+#include <SDL_opengl.h>
 
 using namespace std;
 
@@ -8,8 +9,6 @@ using namespace std;
 
 SDL_Window *win; //pointer to the SDL_Window
 SDL_Renderer *ren; //pointer to the SDL_Renderer
-
-SDL_Texture *tex; //pointer to an SDL_Texture
 
 void initialise()
 {
@@ -57,30 +56,11 @@ void createContext()
 
 void loadAssets()
 {
-	SDL_Surface *bmp = SDL_LoadBMP("assets/hello.bmp");
-	if (bmp == nullptr){
-		SDL_DestroyRenderer(ren);
-		SDL_DestroyWindow(win);
-		std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
-		SDL_Quit();
-		exit(1);
-	}
-
-	tex = SDL_CreateTextureFromSurface(ren, bmp);
-	SDL_FreeSurface(bmp);
-	if (tex == nullptr){
-		SDL_DestroyRenderer(ren);
-		SDL_DestroyWindow(win);
-		std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
-		SDL_Quit();
-		exit(1);
-	}
 	cout << "Loaded Assets OK!\n";
 }
 
 void cleanUp()
 {
-	SDL_DestroyTexture(tex);
 	SDL_DestroyRenderer(ren);
 	SDL_DestroyWindow(win);
 	cout << "Cleaning up OK!\n";
@@ -104,9 +84,20 @@ int main( int argc, char* args[] )
 	//clear framebuffer, render, and present the framebuffer to the display
 	//- usually loop forever, but not in this example
 
-	SDL_RenderClear(ren);
-	SDL_RenderCopy(ren, tex, NULL, NULL);
-	SDL_RenderPresent(ren);
+	//LOOP FROM HERE - PLACEHOLDER
+
+		//GET INPUT HERE - PLACEHOLDER
+
+		//UPDATE SIMULATION - PLACEHOLDER
+
+		SDL_RenderClear(ren); //clear the screen. To what color?
+		
+		//RENDER HERE - PLACEHOLDER
+
+		SDL_RenderPresent(ren); //present the frame buffer to the display (swapBuffers)
+
+	//LOOP TO HERE - PLACEHOLDER
+
 
 	//not looping, so delay so we can see what it does
 	SDL_Delay(2000); //Wait for 2 seconds before exiting
