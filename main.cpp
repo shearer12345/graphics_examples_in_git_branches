@@ -35,9 +35,9 @@ const std::string strFragmentShader(
 	);
 
 const float vertexPositions[] = {
-	0.75f, 0.75f, 0.0f, 1.0f,
-	0.75f, -0.75f, 0.0f, 1.0f,
-	-0.75f, -0.75f, 0.0f, 1.0f,
+	0.0f, 0.5f, 0.0f, 1.0f,
+	-0.4330127f, -0.25f, 0.0f, 1.0f,
+	0.4330127f, -0.25f, 0.0f, 1.0f,
 };
 
 GLuint positionBufferObject;
@@ -58,7 +58,7 @@ void initialise()
 
 void createWindow()
 {
-	win = SDL_CreateWindow("Hello World!", 100, 100, 640, 480, SDL_WINDOW_OPENGL);
+	win = SDL_CreateWindow("Hello World!", 100, 100, 600, 600, SDL_WINDOW_OPENGL); //same height and width makes the window square ...
 	if (win == nullptr)
 	{
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
@@ -212,6 +212,23 @@ void loadAssets()
 	cout << "Loaded Assets OK!\n";
 }
 
+void render()
+{
+	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
+
+	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
+
+	glEnableVertexAttribArray(0); //this 0 corresponds to the location = 0 in the GLSL for the vertex shader.
+		//more generically, use glGetAttribLocation() after GLSL linking to obtain the assigned attribute location.
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
+
+	glDrawArrays(GL_TRIANGLES, 0, 3); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+
+	glDisableVertexAttribArray(0); //cleanup
+	glUseProgram(0); //clean up
+
+}
 void cleanUp()
 {
 	SDL_GL_DeleteContext(context);
@@ -235,9 +252,6 @@ int main( int argc, char* args[] )
 	//- usually do just once
 	loadAssets();
 	
-	//clear framebuffer, render, and present the framebuffer to the display
-	//- usually loop forever, but not in this example
-
 	//LOOP FROM HERE - PLACEHOLDER
 
 		//GET INPUT HERE - PLACEHOLDER
@@ -245,8 +259,9 @@ int main( int argc, char* args[] )
 		//UPDATE SIMULATION - PLACEHOLDER
 
 		glClear(GL_COLOR_BUFFER_BIT);
-		//RENDER HERE - PLACEHOLDER
 
+		render(); //RENDER HERE - PLACEHOLDER
+		
 		SDL_GL_SwapWindow(win);; //present the frame buffer to the display (swapBuffers)
 
 	//LOOP TO HERE - PLACEHOLDER
