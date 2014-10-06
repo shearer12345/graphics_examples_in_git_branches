@@ -15,13 +15,13 @@ solution "graphicsExamplesInGitBranches"
       files { "**.h", "**.cpp" }
 
       -- where are header files?
-      includedirs { "./graphics_dependencies/SDL2-2.0.3/include" }
+      includedirs { "./graphics_dependencies/SDL2-2.0.3/include", "./graphics_dependencies/glew-1.11.0/include" }
 
       -- what libraries need linking to
-      links { "SDL2", "SDL2main" }
+      links { "glew32", "SDL2", "SDL2main" }
 
       -- where are libraries? 
-      libdirs { "./graphics_dependencies/SDL2-2.0.3/lib/x86" }
+      libdirs { "./graphics_dependencies/glew-1.11.0/lib/Release/Win32", "./graphics_dependencies/SDL2-2.0.3/lib/x86" }
  
       configuration "Debug"
          defines { "DEBUG" }

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <GL/glew.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
 
@@ -79,7 +80,6 @@ int main( int argc, char* args[] )
 	//load stuff from files
 	//- usually do just once
 	loadAssets();
-	
 	
 	//clear framebuffer, render, and present the framebuffer to the display
 	//- usually loop forever, but not in this example
