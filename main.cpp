@@ -2,14 +2,13 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
-#include <SDL_opengl.h>
 
 using namespace std;
 
 //global variables
 
 SDL_Window *win; //pointer to the SDL_Window
-SDL_Renderer *ren; //pointer to the SDL_Renderer
+SDL_GLContext context; //the SDL_GLContext
 
 void initialise()
 {
@@ -22,7 +21,7 @@ void initialise()
 
 void createWindow()
 {
-	win = SDL_CreateWindow("Hello World!", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
+	win = SDL_CreateWindow("Hello World!", 100, 100, 640, 480, SDL_WINDOW_OPENGL);
 	if (win == nullptr)
 	{
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
@@ -45,15 +44,32 @@ void setGLAttributes()
 
 void createContext()
 {
-	ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (ren == nullptr){
+	context = SDL_GL_CreateContext(win);
+	if (context == nullptr){
 		SDL_DestroyWindow(win);
-		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+		std::cout << "SDL_GL_CreateContext Error: " << SDL_GetError() << std::endl;
 		SDL_Quit();
 		exit(1);
 	}
 	cout << "Created OpenGL context OK!\n";
 }
+
+void initGlew()
+{
+	GLenum rev;
+	glewExperimental = GL_TRUE; //GLEW isn't perfect - see https://www.opengl.org/wiki/OpenGL_Loading_Library#GLEW
+	rev = glewInit();
+	if (GLEW_OK != rev){
+		std::cout << "GLEW Error: " << glewGetErrorString(rev) << std::endl;
+		SDL_Quit();
+		exit(1);
+	}
+	else {
+		cout << "GLEW Init OK!\n";
+	}
+}
+
+
 
 void loadAssets()
 {
@@ -62,7 +78,7 @@ void loadAssets()
 
 void cleanUp()
 {
-	SDL_DestroyRenderer(ren);
+	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(win);
 	cout << "Cleaning up OK!\n";
 }
@@ -76,6 +92,8 @@ int main( int argc, char* args[] )
 	createWindow();
 	setGLAttributes();
 	createContext();
+	initGlew();
+
 
 	//load stuff from files
 	//- usually do just once
@@ -90,11 +108,10 @@ int main( int argc, char* args[] )
 
 		//UPDATE SIMULATION - PLACEHOLDER
 
-		SDL_RenderClear(ren); //clear the screen. To what color?
-		
+		glClear(GL_COLOR_BUFFER_BIT);
 		//RENDER HERE - PLACEHOLDER
 
-		SDL_RenderPresent(ren); //present the frame buffer to the display (swapBuffers)
+		SDL_GL_SwapWindow(win);; //present the frame buffer to the display (swapBuffers)
 
 	//LOOP TO HERE - PLACEHOLDER
 
