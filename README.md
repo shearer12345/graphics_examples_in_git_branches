@@ -2,7 +2,7 @@
 
 - A series of examples each as a git branch
 
-- Build Status of master branch - ![masterBranchBuildStatus](https://travis-ci.org/shearer12345/graphics_examples_in_git_branches.svg?branch=master)
+- Build Status of master branch - [![Build Status](https://travis-ci.org/shearer12345/graphics_examples_in_git_branches.svg?branch=master)](https://travis-ci.org/shearer12345/graphics_examples_in_git_branches)
 
 ```bash
 git clone --recursive https://github.com/shearer12345/graphics_examples_in_git_branches.git
