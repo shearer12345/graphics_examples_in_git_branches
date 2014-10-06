@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 #include <GL/glew.h>
 #include <SDL.h>
@@ -9,6 +11,27 @@ using namespace std;
 
 SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
+GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
+
+//string holding the **source** of our vertex shader, to save loading from a file
+const std::string strVertexShader(
+	"#version 330\n"
+	"layout(location = 0) in vec4 position;\n"
+	"void main()\n"
+	"{\n"
+	"   gl_Position = position;\n"
+	"}\n"
+	);
+
+//string holding the **source** of our fragment shader, to save loading from a file
+const std::string strFragmentShader(
+	"#version 330\n"
+	"out vec4 outputColor;\n"
+	"void main()\n"
+	"{\n"
+	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+	"}\n"
+	);
 
 void initialise()
 {
@@ -69,10 +92,92 @@ void initGlew()
 	}
 }
 
+GLuint createShader(GLenum eShaderType, const std::string &strShaderFile)
+{
+	GLuint shader = glCreateShader(eShaderType);
+	const char *strFileData = strShaderFile.c_str();
+	glShaderSource(shader, 1, &strFileData, NULL);
 
+	glCompileShader(shader);
+
+	GLint status;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (status == GL_FALSE)
+	{
+		GLint infoLogLength;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+		GLchar *strInfoLog = new GLchar[infoLogLength + 1];
+		glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
+
+		const char *strShaderType = NULL;
+		switch (eShaderType)
+		{
+		case GL_VERTEX_SHADER: strShaderType = "vertex"; break;
+		case GL_GEOMETRY_SHADER: strShaderType = "geometry"; break;
+		case GL_FRAGMENT_SHADER: strShaderType = "fragment"; break;
+		}
+
+		fprintf(stderr, "Compile failure in %s shader:\n%s\n", strShaderType, strInfoLog);
+		delete[] strInfoLog;
+	}
+
+	return shader;
+}
+
+GLuint createProgram(const std::vector<GLuint> &shaderList)
+{
+	GLuint program = glCreateProgram();
+
+	for (size_t iLoop = 0; iLoop < shaderList.size(); iLoop++)
+		glAttachShader(program, shaderList[iLoop]);
+
+	glLinkProgram(program);
+
+	GLint status;
+	glGetProgramiv(program, GL_LINK_STATUS, &status);
+	if (status == GL_FALSE)
+	{
+		GLint infoLogLength;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+		GLchar *strInfoLog = new GLchar[infoLogLength + 1];
+		glGetProgramInfoLog(program, infoLogLength, NULL, strInfoLog);
+		fprintf(stderr, "Linker failure: %s\n", strInfoLog);
+		delete[] strInfoLog;
+	}
+
+	for (size_t iLoop = 0; iLoop < shaderList.size(); iLoop++)
+		glDetachShader(program, shaderList[iLoop]);
+
+	return program;
+}
+
+void initializeProgram()
+{
+	std::vector<GLuint> shaderList;
+
+	shaderList.push_back(createShader(GL_VERTEX_SHADER, strVertexShader));
+	shaderList.push_back(createShader(GL_FRAGMENT_SHADER, strFragmentShader));
+
+	theProgram = createProgram(shaderList);
+	if (theProgram == 0)
+	{
+		cout << "GLSL program creation error." << std::endl;
+		SDL_Quit();
+		exit(1);
+	}
+	else {
+		cout << "GLSL program creation OK! GLUint is: " << theProgram << std::endl;
+	}
+
+	//clean up shaders (we don't need them anymore as they are no in theProgram
+	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
+}
 
 void loadAssets()
 {
+	initializeProgram();
 	cout << "Loaded Assets OK!\n";
 }
 
