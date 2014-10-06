@@ -7,7 +7,8 @@
 
 using namespace std;
 
-//global variables
+/////////////////////
+// global variables
 
 SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
@@ -32,6 +33,19 @@ const std::string strFragmentShader(
 	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
 	"}\n"
 	);
+
+const float vertexPositions[] = {
+	0.75f, 0.75f, 0.0f, 1.0f,
+	0.75f, -0.75f, 0.0f, 1.0f,
+	-0.75f, -0.75f, 0.0f, 1.0f,
+};
+
+GLuint positionBufferObject;
+GLuint vao;
+
+// end Global Variables
+/////////////////////////
+
 
 void initialise()
 {
@@ -175,9 +189,26 @@ void initializeProgram()
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
 
+void initializeVertexBuffer()
+{
+	glGenBuffers(1, &positionBufferObject);
+
+	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	cout << "positionBufferObject created OK! GLUint is: " << positionBufferObject << std::endl;
+}
+
 void loadAssets()
 {
-	initializeProgram();
+	initializeProgram(); //create GLSL Shaders, link into a GLSL program
+
+	initializeVertexBuffer(); //load data into a vertex buffer
+
+	glGenVertexArrays(1, &vao); //create a Vertex Array Object
+	glBindVertexArray(vao); //make the VAO active
+	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
+
 	cout << "Loaded Assets OK!\n";
 }
 
