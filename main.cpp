@@ -258,6 +258,7 @@ int main( int argc, char* args[] )
 
 		//UPDATE SIMULATION - PLACEHOLDER
 
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		render(); //RENDER HERE - PLACEHOLDER
