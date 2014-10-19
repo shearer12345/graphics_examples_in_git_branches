@@ -13,6 +13,7 @@ before_install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
   - sudo apt-get --yes install premake4
   - sudo apt-get --yes install libsdl2-dev
+  - sudo apt-get --yes install libglew-dev
   
 before_script:
   - premake4 gmake
