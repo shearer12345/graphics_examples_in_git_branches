@@ -34,10 +34,11 @@ const std::string strFragmentShader(
 	"}\n"
 	);
 
+const float scaleX = 2.0f, scaleY = 2.0f;
 const float vertexPositions[] = {
-	0.0f, 0.5f, 0.0f, 1.0f,
-	-0.4330127f, -0.25f, 0.0f, 1.0f,
-	0.4330127f, -0.25f, 0.0f, 1.0f,
+	0.0f * scaleX, 0.5f * scaleY, 0.0f, 1.0f,
+	-0.4330127f * scaleX, -0.25f * scaleY, 0.0f, 1.0f,
+	0.4330127f * scaleX, -0.25f * scaleY, 0.0f, 1.0f,
 };
 
 GLuint positionBufferObject;
