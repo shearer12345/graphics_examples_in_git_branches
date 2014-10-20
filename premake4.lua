@@ -46,6 +46,7 @@ solution "graphicsExamplesInGitBranches"
 
       configuration "3_1_*"
          defines { "OPENGL_VERSION_3_1" }
+         targetprefix "3_1_"
       configuration "3_3_*"
          defines { "OPENGL_VERSION_3_3" }
-         
+         targetprefix "3_3_"
