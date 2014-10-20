@@ -31,7 +31,7 @@ solution "graphicsExamplesInGitBranches"
  
       configuration "Debug"
          defines { "DEBUG" }
-         --flags { "Symbols" }
+         flags { "Symbols" }
          targetsuffix "-debug"
  
       configuration "Release"
