@@ -13,15 +13,16 @@ using namespace std;
 std::string exeName;
 SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
-GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
 
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
 	"#version 330\n"
 	"layout(location = 0) in vec4 position;\n"
+	"uniform vec2 offset;\n"
 	"void main()\n"
 	"{\n"
 	"   gl_Position = position;\n"
+	"   gl_Position.xy += offset;\n"
 	"}\n"
 	);
 
@@ -35,11 +36,26 @@ const std::string strFragmentShader(
 	"}\n"
 	);
 
+
+//our variables
+bool done = false;
+
 const float vertexPositions[] = {
 	0.0f, 0.5f, 0.0f, 1.0f,
 	-0.4330127f, -0.25f, 0.0f, 1.0f,
 	0.4330127f, -0.25f, 0.0f, 1.0f,
 };
+
+//the offset we'll pass to the GLSL
+double offsetX = -0.5; //using different values from CPU and static GLSL examples, to make it clear this is working
+double offsetY = -0.5; //NOTE: we could use an array and pass the pointer, to be simpler & more efficent
+double offsetXSpeed = 0.2; //rate of change of offsetX in units per second
+double offsetYSpeed = 0.2; //rate of change of offsetY in units per second
+
+//our GL and GLSL variables
+
+GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
+GLuint offsetLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
 
 GLuint positionBufferObject;
 GLuint vao;
@@ -196,6 +212,7 @@ void initializeProgram()
 		cout << "GLSL program creation OK! GLUint is: " << theProgram << std::endl;
 	}
 
+	offsetLocation = glGetUniformLocation(theProgram, "offset");
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
@@ -223,9 +240,19 @@ void loadAssets()
 	cout << "Loaded Assets OK!\n";
 }
 
+void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
+{
+	offsetX += offsetXSpeed * simLength;
+	offsetY += offsetYSpeed * simLength;
+}
+
 void render()
 {
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
+
+	//load data to GLSL that **may** have changed
+	glUniform2f(offsetLocation, offsetX, offsetY);
+
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
 
@@ -263,25 +290,24 @@ int main( int argc, char* args[] )
 	//- usually do just once
 	loadAssets();
 	
-	//LOOP FROM HERE - PLACEHOLDER
-
+	
+	while (!done && (SDL_GetTicks() < 5000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
+		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
+	{
 		//GET INPUT HERE - PLACEHOLDER
 
-		//UPDATE SIMULATION - PLACEHOLDER
+		updateSimulation(0.02); //call update simulation with an amount of time to simulate for (in seconds)
+		  //WARNING - we are always updating by a constant amount of time. This should be tied to how long has elapsed
+		    // see, for example, http://headerphile.blogspot.co.uk/2014/07/part-9-no-more-delays.html
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		render(); //RENDER HERE - PLACEHOLDER
-		
+
 		SDL_GL_SwapWindow(win);; //present the frame buffer to the display (swapBuffers)
 
-	//LOOP TO HERE - PLACEHOLDER
+	} //LOOP TO HERE
 
-
-	//not looping, so delay so we can see what it does
-	SDL_Delay(2000); //Wait for 2 seconds before exiting
-
-	
 	//cleanup and exit
 	cleanUp();
 	SDL_Quit();
