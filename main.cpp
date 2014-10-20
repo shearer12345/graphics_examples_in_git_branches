@@ -10,6 +10,7 @@ using namespace std;
 /////////////////////
 // global variables
 
+std::string exeName;
 SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
@@ -58,7 +59,17 @@ void initialise()
 
 void createWindow()
 {
-	win = SDL_CreateWindow("Hello World!", 100, 100, 600, 600, SDL_WINDOW_OPENGL); //same height and width makes the window square ...
+	//get executable name, and use as window title
+	int beginIdxWindows = exeName.rfind("\\"); //find last occurrence of a backslash
+	int beginIdxLinux = exeName.rfind("/"); //find last occurrence of a forward slash
+	int beginIdx = max(beginIdxWindows, beginIdxLinux);
+	std::string exeNameEnd = exeName.substr(beginIdx + 1);
+	const char *exeNameCStr = exeNameEnd.c_str();
+	
+	//create window
+	win = SDL_CreateWindow(exeNameCStr, 100, 100, 600, 600, SDL_WINDOW_OPENGL); //same height and width makes the window square ...
+
+	//error handling
 	if (win == nullptr)
 	{
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
@@ -238,7 +249,7 @@ void cleanUp()
 
 int main( int argc, char* args[] )
 {
-
+	exeName = args[0];
 	//setup
 	//- do just once
 	initialise();
