@@ -18,9 +18,11 @@ GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (onl
 const std::string strVertexShader(
 	"#version 330\n"
 	"layout(location = 0) in vec4 position;\n"
+	"vec2 scale = vec2(1.8, 1.8);\n"
 	"void main()\n"
 	"{\n"
 	"   gl_Position = position;\n"
+	"   gl_Position.xy *= scale;\n"
 	"}\n"
 	);
 
