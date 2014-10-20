@@ -3,7 +3,7 @@ branch = dofile("getGitBranch.lua")
 -- A solution contains projects, and defines the available configurations
 solution "graphicsExamplesInGitBranches"
    targetdir ( "bin" )
-   configurations { "Debug", "Release" }
+   configurations { "3_3_Debug", "3_3_Release", "3_1_Debug", "3_1_Release" }
     
    -- A project defines one build target
    project (branch)  -- this project is called the name of the current git branch
@@ -35,11 +35,17 @@ solution "graphicsExamplesInGitBranches"
                     "./graphics_dependencies/SDL2-2.0.3/lib/x86"
               }
  
-      configuration "Debug"
+      configuration "*Debug"
          defines { "DEBUG" }
          flags { "Symbols" }
          targetsuffix "-debug"
  
-      configuration "Release"
+      configuration "*Release"
          defines { "NDEBUG" }
          flags { "Optimize" }    
+
+      configuration "3_1_*"
+         defines { "OPENGL_VERSION_3_1" }
+      configuration "3_3_*"
+         defines { "OPENGL_VERSION_3_3" }
+         

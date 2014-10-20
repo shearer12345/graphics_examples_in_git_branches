@@ -16,7 +16,12 @@ SDL_GLContext context; //the SDL_GLContext
 
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
-	"#version 140\n"
+	#ifdef OPENGL_VERSION_3_1
+		"#version 140\n"
+	#endif
+	#ifdef OPENGL_VERSION_3_3
+		"#version 140\n"
+	#endif
 	"in vec4 position;\n"
 	"uniform vec2 offset;\n"
 	"void main()\n"
@@ -28,7 +33,12 @@ const std::string strVertexShader(
 
 //string holding the **source** of our fragment shader, to save loading from a file
 const std::string strFragmentShader(
-	"#version 140\n"
+	#ifdef OPENGL_VERSION_3_1
+		"#version 140\n"
+	#endif
+	#ifdef OPENGL_VERSION_3_3
+		"#version 140\n"
+	#endif
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
@@ -98,9 +108,18 @@ void createWindow()
 
 void setGLAttributes()
 {
-	// set the opengl context version
-	int major = 3;
-	int minor = 1;
+	#ifdef OPENGL_VERSION_3_1
+		cout << "Built for OpenGL Version 3.1" << endl;
+		// set the opengl context version
+		int major = 3;
+		int minor = 1;
+	#endif
+	#ifdef OPENGL_VERSION_3_3
+		cout << "Built for OpenGL Version 3.3" << endl;
+		// set the opengl context version
+		int major = 3;
+		int minor = 3;
+	#endif
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); //core profile
