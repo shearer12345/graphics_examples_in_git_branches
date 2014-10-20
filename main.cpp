@@ -12,13 +12,12 @@ using namespace std;
 
 SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
-GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
 
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
 	"#version 330\n"
 	"layout(location = 0) in vec4 position;\n"
-	"vec2 offset = vec2(0.5, -0.5);\n"
+	"uniform vec2 offset;\n"
 	"void main()\n"
 	"{\n"
 	"   gl_Position = position;\n"
@@ -36,11 +35,22 @@ const std::string strFragmentShader(
 	"}\n"
 	);
 
+
+//our variables
 const float vertexPositions[] = {
 	0.0f, 0.5f, 0.0f, 1.0f,
 	-0.4330127f, -0.25f, 0.0f, 1.0f,
 	0.4330127f, -0.25f, 0.0f, 1.0f,
 };
+
+//the offset we'll pass to the GLSL
+float offsetX = -0.5; //using different values from CPU and static GLSL examples, to make it clear this is working
+float offsetY = -0.5; //NOTE: we could use an array and pass the pointer, to be simpler & more efficent
+
+//our GL and GLSL variables
+
+GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
+GLuint offsetLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
 
 GLuint positionBufferObject;
 GLuint vao;
@@ -187,6 +197,7 @@ void initializeProgram()
 		cout << "GLSL program creation OK! GLUint is: " << theProgram << std::endl;
 	}
 
+	offsetLocation = glGetUniformLocation(theProgram, "offset");
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
@@ -217,6 +228,10 @@ void loadAssets()
 void render()
 {
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
+
+	//load data to GLSL that **may** have changed
+	glUniform2f(offsetLocation, offsetX, offsetY);
+
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
 
