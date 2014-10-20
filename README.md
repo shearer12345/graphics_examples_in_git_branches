@@ -8,18 +8,42 @@
 git clone --recursive https://github.com/shearer12345/graphics_examples_in_git_branches.git
 ```
 
-##Branches available (order of age-ish)
+##Branches available (order of age-ish, but grouped)
 
 - master (working point)
+
+###glTriangle GLSL (GPU) effects
+- glTriangleGLSLTranslatedWithUniformChangingOverTime
+- glTriangleGLSLTranslatedWithUniform
+- glTriangleGLSLScaled
+- glTriangleGLSLTranslated
+- glTriangleGLSLGreen
+
+###glTriangle CPU effects
+- glTriangleWhiteCPUScaled
+- glTriangleWhiteCPUTranslated
+- glTriangleWhiteDifferentShape
+- glTriangleWhiteWithRedBackground
+
+###glTriangle
+- glTriangleWhiteWithWindowNamed
+- glTriangleWhite
+
+###glSetup
+- glGenVertexBuffer
 - glCreateShadersAndProgram
 - glGlew
 - glIncluded
+
+###SDL setup
 - sdlHelloWorldWithFunctions
 - sdlHelloWorld
 - sdlCreateContext
 - sdlCreateWindow
 - sdlInitialise
 - sdlIncludeAndLink
+
+###Base build
 - baseBuildWithNoFeaturesWithTravisTesting
 - baseBuildWithNoFeatures
 
