@@ -8,7 +8,7 @@ if sys.version_info < (3, 0):
 import subprocess
 
 #checkout master
-subprocess.check_call('git checkout master')
+subprocess.check_call('git checkout master', shell=True)
 
 #Get remotes string and local string from git
 remotesString = subprocess.check_output('git branch -r', shell=True, universal_newlines=True)
@@ -41,7 +41,7 @@ for remote in remotes:
 
 #iterate locals and update them
 for local in locals:
-    subprocess.check_call('git checkout ' + local)
-    subprocess.check_call('git pull')
+    subprocess.check_call('git checkout ' + local, shell=True)
+    subprocess.check_call('git pull', shell=True)
 
-subprocess.check_call('git checkout master')
+subprocess.check_call('git checkout master', shell=True)
