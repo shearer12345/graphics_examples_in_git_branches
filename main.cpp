@@ -17,7 +17,7 @@ SDL_GLContext context; //the SDL_GLContext
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
 	#ifdef OPENGL_VERSION_3_1
-		"#version 140\n"
+		"#version 130\n"
 	#endif
 	#ifdef OPENGL_VERSION_3_3
 		"#version 140\n"
@@ -34,7 +34,7 @@ const std::string strVertexShader(
 //string holding the **source** of our fragment shader, to save loading from a file
 const std::string strFragmentShader(
 	#ifdef OPENGL_VERSION_3_1
-		"#version 140\n"
+		"#version 130\n"
 	#endif
 	#ifdef OPENGL_VERSION_3_3
 		"#version 140\n"
@@ -312,7 +312,7 @@ int main( int argc, char* args[] )
 	loadAssets();
 
 
-	while (!done && (SDL_GetTicks() < 5000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
+	while (!done && (SDL_GetTicks() < 5000000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
 		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
 	{
 		//GET INPUT HERE - PLACEHOLDER
@@ -320,7 +320,8 @@ int main( int argc, char* args[] )
 		updateSimulation(0.02); //call update simulation with an amount of time to simulate for (in seconds)
 		  //WARNING - we are always updating by a constant amount of time. This should be tied to how long has elapsed
 		    // see, for example, http://headerphile.blogspot.co.uk/2014/07/part-9-no-more-delays.html
-
+        glViewport(0,0,600,600);
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		render(); //RENDER HERE - PLACEHOLDER
