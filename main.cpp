@@ -305,7 +305,8 @@ int main( int argc, char* args[] )
 	setGLAttributes();
 	createContext();
 	initGlew();
-
+	glViewport(0,0,600,600);
+    SDL_GL_SwapWindow(win); //just force a swap, to make the trace clearer
 
 	//load stuff from files
 	//- usually do just once
