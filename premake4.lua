@@ -14,12 +14,14 @@ solution "graphicsExamplesInGitBranches"
       configuration {}
 
       files { "**.h", "**.cpp" }
-
+      excludes { "./graphics_dependencies/**" }
+      
       -- where are header files?
       includedirs {
                     "./graphics_dependencies/SDL2-2.0.3/include",
                     "/usr/include/SDL2",
-                    "./graphics_dependencies/glew-1.11.0/include"
+                    "./graphics_dependencies/glew-1.11.0/include",
+                    "./graphics_dependencies/glm-0.9.5.4/glm",
                   }
 
       -- what libraries need linking to
