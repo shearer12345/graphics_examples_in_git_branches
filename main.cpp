@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
+#include <glm/glm.hpp>
 
 using namespace std;
 
