@@ -4,7 +4,9 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
-#include <glm/glm.hpp>
+#include <glm/glm.hpp> //include the main glm header
+#include <glm/gtc/matrix_transform.hpp> //include functions to ease the calculation of the view and projection matrices
+#include <glm/gtc/type_ptr.hpp> //include functionality for converting a matrix object into a float array for usage in OpenGL
 
 using namespace std;
 
@@ -24,11 +26,10 @@ const std::string strVertexShader(
 		"#version 140\n"
 	#endif
 	"in vec4 position;\n"
-	"uniform vec2 offset;\n"
+	"uniform mat4 offsetMatrix;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = position;\n"
-	"   gl_Position.xy += offset;\n"
+	"   gl_Position = offsetMatrix * position;\n" //multiple the position by the transformation matrix (offset)
 	"}\n"
 	);
 
@@ -58,16 +59,14 @@ const float vertexPositions[] = {
 };
 
 //the offset we'll pass to the GLSL
-double offsetX = -0.5; //using different values from CPU and static GLSL examples, to make it clear this is working
-double offsetY = -0.5; //NOTE: we could use an array and pass the pointer, to be simpler & more efficent
-double offsetXSpeed = 0.2; //rate of change of offsetX in units per second
-double offsetYSpeed = 0.2; //rate of change of offsetY in units per second
+glm::mat4 offsetMatrix; // the transformation matrix for our object - which is the identity matrix by default
+glm::vec3 offsetSpeedVector = glm::vec3(0.2, 0.2, 0.0); //rate of change of the offset
 
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
 GLint positionLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
-GLint offsetLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
+GLint offsetMatrixLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
 
 GLuint positionBufferObject;
 GLuint vao;
@@ -234,7 +233,7 @@ void initializeProgram()
 	}
 
 	positionLocation = glGetAttribLocation(theProgram, "position");
-	offsetLocation = glGetUniformLocation(theProgram, "offset");
+	offsetMatrixLocation = glGetUniformLocation(theProgram, "offsetMatrix");
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
@@ -264,8 +263,12 @@ void loadAssets()
 
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
 {
-	offsetX += offsetXSpeed * simLength;
-	offsetY += offsetYSpeed * simLength;
+
+	//calculate the amount of offset for this timestep
+	glm::vec3 offsetVector = (float)simLength * offsetSpeedVector; //simlength is a double for precision, but offsetSpeedVector in a vector of float, alternatively use glm::dvec3
+
+	//modify the offsetMatrix with the offset, as a translate
+	offsetMatrix = glm::translate(offsetMatrix, offsetVector); 
 }
 
 void render()
@@ -273,8 +276,8 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniform2f(offsetLocation, offsetX, offsetY);
-
+	glUniformMatrix4fv(offsetMatrixLocation, 1, GL_FALSE, glm::value_ptr(offsetMatrix)); //uploaed the offsetMatrix to the appropriate uniform location
+	           // upload only one matrix, and don't transpose it
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
 
