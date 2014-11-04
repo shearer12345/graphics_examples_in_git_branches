@@ -4,6 +4,10 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
+
+#define GLM_FORCE_RADIANS //force glm to use radians //must do **before** including GLM headers 
+//NOTE: GLSL uses radians, so will do the same, for consistency
+
 #include <glm/glm.hpp> //include the main glm header
 #include <glm/gtc/matrix_transform.hpp> //include functions to ease the calculation of the view and projection matrices
 #include <glm/gtc/type_ptr.hpp> //include functionality for converting a matrix object into a float array for usage in OpenGL
@@ -26,10 +30,10 @@ const std::string strVertexShader(
 		"#version 140\n"
 	#endif
 	"in vec4 position;\n"
-	"uniform mat4 offsetMatrix;\n"
+	"uniform mat4 rotateMatrix;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = offsetMatrix * position;\n" //multiple the position by the transformation matrix (offset)
+	"   gl_Position = rotateMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
 	"}\n"
 	);
 
@@ -58,15 +62,16 @@ const float vertexPositions[] = {
 	0.4330127f, -0.25f, 0.0f, 1.0f,
 };
 
-//the offset we'll pass to the GLSL
-glm::mat4 offsetMatrix; // the transformation matrix for our object - which is the identity matrix by default
-glm::vec3 offsetSpeedVector = glm::vec3(0.2, 0.2, 0.0); //rate of change of the offset
+//the rotate we'll pass to the GLSL
+glm::mat4 rotateMatrix; // the transformation matrix for our object - which is the identity matrix by default
+float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
+
 
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
-GLint positionLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
-GLint offsetMatrixLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
+GLint positionLocation; //GLuint that we'll fill in with the location of the `rotate` variable in the GLSL
+GLint rotateMatrixLocation; //GLuint that we'll fill in with the location of the `rotate` variable in the GLSL
 
 GLuint positionBufferObject;
 GLuint vao;
@@ -233,7 +238,7 @@ void initializeProgram()
 	}
 
 	positionLocation = glGetAttribLocation(theProgram, "position");
-	offsetMatrixLocation = glGetUniformLocation(theProgram, "offsetMatrix");
+	rotateMatrixLocation = glGetUniformLocation(theProgram, "rotateMatrix");
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
@@ -264,11 +269,12 @@ void loadAssets()
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
 {
 
-	//calculate the amount of offset for this timestep
-	glm::vec3 offsetVector = (float)simLength * offsetSpeedVector; //simlength is a double for precision, but offsetSpeedVector in a vector of float, alternatively use glm::dvec3
-
-	//modify the offsetMatrix with the offset, as a translate
-	offsetMatrix = glm::translate(offsetMatrix, offsetVector); 
+	//calculate the amount of rotate for this timestep
+	float rotate = (float)simLength * rotateSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
+	
+	//modify the rotateMatrix with the rotate, as a rotate, around the z-axis
+	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
+	rotateMatrix = glm::rotate(rotateMatrix, rotate, unitZ);
 }
 
 void render()
@@ -276,7 +282,7 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniformMatrix4fv(offsetMatrixLocation, 1, GL_FALSE, glm::value_ptr(offsetMatrix)); //uploaed the offsetMatrix to the appropriate uniform location
+	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //uploaed the rotateMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
