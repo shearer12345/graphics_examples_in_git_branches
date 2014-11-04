@@ -74,6 +74,38 @@ GLuint vao;
 // end Global Variables
 /////////////////////////
 
+/////////////////////////
+// Operator overloading
+// to allow us to ConsoleOut (cout) glm variables
+
+//Vec3
+std::ostream &operator<< (std::ostream &out, const glm::vec3 &vec) {
+	int i;
+	for (i = 0; i<3; i++)
+	{
+		cout << vec[i] << " ";
+	}
+	return out;
+}
+
+//Matrix4
+std::ostream &operator<< (std::ostream &out, const glm::mat4 &mat) {
+	int i, j;
+	cout << endl;
+	for (j = 0; j<4; j++){
+		for (i = 0; i<4; i++)
+		{
+			cout << mat[i][j] << " ";
+		}
+		cout << endl;
+	}
+	return out;
+}
+
+
+// end Operator overloading
+/////////////////////////////
+
 
 void initialise()
 {
@@ -263,12 +295,23 @@ void loadAssets()
 
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
 {	
+	//cout formating
+	ios_base::fmtflags oldFlags = std::cout.flags(); // backup floatfield
+	std::cout.precision(5); //set precision
+	std::cout.setf(std::ios::fixed, std::ios::floatfield); // floatfield set to fixed
+
+
 	//calculate the amount of scale for this timestep
 	//Note: we add one to the scaleSpeedVector, as we want the scaleVector to be "one-centric"
 	glm::vec3 scaleVector = glm::vec3(1.0f) + (float)simLength * scaleSpeedVector; //simlength is a double for precision, but scaleSpeedVector in a vector of float, alternatively use glm::dvec3
+	cout << "scaleVector: " << scaleVector << endl;
+
 
 	//modify the scaleMatrix with the scale, as a scale
 	scaleMatrix = glm::scale(scaleMatrix, scaleVector); 
+	cout << "scaleMatrix: " << scaleMatrix << endl;
+
+	std::cout.flags(oldFlags); // restore floatfield
 }
 
 void render()
