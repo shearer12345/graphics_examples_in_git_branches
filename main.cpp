@@ -26,10 +26,10 @@ const std::string strVertexShader(
 		"#version 140\n"
 	#endif
 	"in vec4 position;\n"
-	"uniform mat4 offsetMatrix;\n"
+	"uniform mat4 scaleMatrix;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = offsetMatrix * position;\n" //multiple the position by the transformation matrix (offset)
+	"   gl_Position = scaleMatrix * position;\n" //multiple the position by the transformation matrix (scale)
 	"}\n"
 	);
 
@@ -58,15 +58,15 @@ const float vertexPositions[] = {
 	0.4330127f, -0.25f, 0.0f, 1.0f,
 };
 
-//the offset we'll pass to the GLSL
-glm::mat4 offsetMatrix; // the transformation matrix for our object - which is the identity matrix by default
-glm::vec3 offsetSpeedVector = glm::vec3(0.2, 0.2, 0.0); //rate of change of the offset
+//the scale we'll pass to the GLSL
+glm::mat4 scaleMatrix; // the transformation matrix for our object - which is the identity matrix by default
+glm::vec3 scaleSpeedVector = glm::vec3(0.1, 0.1, 0.0); //rate of change of the scale - scale in x and y, but not in z
 
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
-GLint positionLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
-GLint offsetMatrixLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
+GLint positionLocation; //GLuint that we'll fill in with the location of the `position` variable in the GLSL
+GLint scaleMatrixLocation; //GLuint that we'll fill in with the location of the `scale` variable in the GLSL
 
 GLuint positionBufferObject;
 GLuint vao;
@@ -233,7 +233,7 @@ void initializeProgram()
 	}
 
 	positionLocation = glGetAttribLocation(theProgram, "position");
-	offsetMatrixLocation = glGetUniformLocation(theProgram, "offsetMatrix");
+	scaleMatrixLocation = glGetUniformLocation(theProgram, "scaleMatrix");
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
@@ -262,13 +262,13 @@ void loadAssets()
 }
 
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
-{
+{	
+	//calculate the amount of scale for this timestep
+	//Note: we add one to the scaleSpeedVector, as we want the scaleVector to be "one-centric"
+	glm::vec3 scaleVector = glm::vec3(1.0f) + (float)simLength * scaleSpeedVector; //simlength is a double for precision, but scaleSpeedVector in a vector of float, alternatively use glm::dvec3
 
-	//calculate the amount of offset for this timestep
-	glm::vec3 offsetVector = (float)simLength * offsetSpeedVector; //simlength is a double for precision, but offsetSpeedVector in a vector of float, alternatively use glm::dvec3
-
-	//modify the offsetMatrix with the offset, as a translate
-	offsetMatrix = glm::translate(offsetMatrix, offsetVector); 
+	//modify the scaleMatrix with the scale, as a scale
+	scaleMatrix = glm::scale(scaleMatrix, scaleVector); 
 }
 
 void render()
@@ -276,7 +276,7 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniformMatrix4fv(offsetMatrixLocation, 1, GL_FALSE, glm::value_ptr(offsetMatrix)); //uploaed the offsetMatrix to the appropriate uniform location
+	glUniformMatrix4fv(scaleMatrixLocation, 1, GL_FALSE, glm::value_ptr(scaleMatrix)); //uploaed the scaleMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
