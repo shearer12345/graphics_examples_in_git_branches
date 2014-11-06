@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <SDL.h>
 
-#define GLM_FORCE_RADIANS //force glm to use radians //must do **before** including GLM headers 
+#define GLM_FORCE_RADIANS //force glm to use radians //must do **before** including GLM headers
 //NOTE: GLSL uses radians, so will do the same, for consistency
 
 #include <glm/glm.hpp> //include the main glm header
@@ -30,10 +30,13 @@ const std::string strVertexShader(
 		"#version 140\n"
 	#endif
 	"in vec4 position;\n"
+	"in vec4 color;\n"
 	"uniform mat4 rotateMatrix;\n"
+	"smooth out vec4 theColor;\n"
 	"void main()\n"
 	"{\n"
 	"   gl_Position = rotateMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
+	"   theColor = color;\n" //just pass on the color. It's a **smooth**, so will be interpolated
 	"}\n"
 	);
 
@@ -45,10 +48,11 @@ const std::string strFragmentShader(
 	#ifdef OPENGL_VERSION_3_3
 		"#version 140\n"
 	#endif
+	"smooth in vec4 theColor;\n"
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
-	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+	"   outputColor = theColor;\n"
 	"}\n"
 	);
 
@@ -56,10 +60,16 @@ const std::string strFragmentShader(
 //our variables
 bool done = false;
 
-const float vertexPositions[] = {
+const float vertexData[] = {
+    //positions
 	0.0f, 0.5f, 0.0f, 1.0f,
 	-0.4330127f, -0.25f, 0.0f, 1.0f,
 	0.4330127f, -0.25f, 0.0f, 1.0f,
+
+	//colors
+	1.0f, 0.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
 };
 
 //the rotate we'll pass to the GLSL
@@ -70,10 +80,11 @@ float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
-GLint positionLocation; //GLuint that we'll fill in with the location of the `rotate` variable in the GLSL
-GLint rotateMatrixLocation; //GLuint that we'll fill in with the location of the `rotate` variable in the GLSL
+GLint positionLocation; //GLuint that we'll fill in with the location of the `position` attribute in the GLSL
+GLint colorLocation; //GLuint that we'll fill in with the location of the `color` attribute in the GLSL
+GLint rotateMatrixLocation; //GLuint that we'll fill in with the location of the `rotateMatrix` variable in the GLSL
 
-GLuint positionBufferObject;
+GLuint vertexBufferObject;
 GLuint vao;
 
 // end Global Variables
@@ -238,6 +249,7 @@ void initializeProgram()
 	}
 
 	positionLocation = glGetAttribLocation(theProgram, "position");
+	colorLocation = glGetAttribLocation(theProgram, "color");
 	rotateMatrixLocation = glGetUniformLocation(theProgram, "rotateMatrix");
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
@@ -245,12 +257,12 @@ void initializeProgram()
 
 void initializeVertexBuffer()
 {
-	glGenBuffers(1, &positionBufferObject);
+	glGenBuffers(1, &vertexBufferObject);
 
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	cout << "positionBufferObject created OK! GLUint is: " << positionBufferObject << std::endl;
+	cout << "positionBufferObject created OK! GLUint is: " << vertexBufferObject << std::endl;
 }
 
 void loadAssets()
@@ -271,7 +283,7 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 
 	//calculate the amount of rotate for this timestep
 	float rotate = (float)simLength * rotateSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
-	
+
 	//modify the rotateMatrix with the rotate, as a rotate, around the z-axis
 	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
 	rotateMatrix = glm::rotate(rotateMatrix, rotate, unitZ);
@@ -285,12 +297,13 @@ void render()
 	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //uploaed the rotateMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
 
-	glEnableVertexAttribArray(positionLocation); //this 0 corresponds to the location = 0 in the GLSL for the vertex shader.
-		//more generically, use glGetAttribLocation() after GLSL linking to obtain the assigned attribute location.
+	glEnableVertexAttribArray(positionLocation);
+    glEnableVertexAttribArray(colorLocation);
 
 	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
+	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)48); //define **how** values are reader from positionBufferObject in Attrib 1
 
 	glDrawArrays(GL_TRIANGLES, 0, 3); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
 
