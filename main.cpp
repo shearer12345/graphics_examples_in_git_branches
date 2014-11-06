@@ -61,15 +61,107 @@ const std::string strFragmentShader(
 bool done = false;
 
 const float vertexData[] = {
-    //positions
-	0.0f, 0.5f, 0.0f, 1.0f,
-	-0.4330127f, -0.25f, 0.0f, 1.0f,
-	0.4330127f, -0.25f, 0.0f, 1.0f,
 
-	//colors
-	1.0f, 0.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
+    //positions
+	 0.25f, 0.25f,   0.25f,1.0f,
+	 0.25f, 0.25f,  -0.25f,1.0f,
+	-0.25f, 0.25f,   0.25f,1.0f,
+
+	 0.25f, 0.25f,  -0.25f,1.0f,
+	-0.25f, 0.25f,  -0.25f,1.0f,
+	-0.25f, 0.25f,   0.25f,1.0f,
+
+	 0.25f, -0.25f,  0.25f, 1.0f,
+	-0.25f, -0.25f,  0.25f, 1.0f,
+	 0.25f, -0.25f, -0.25f, 1.0f,
+
+	 0.25f, -0.25f, -0.25f, 1.0f,
+	-0.25f, -0.25f,  0.25f, 1.0f,
+	-0.25f, -0.25f, -0.25f, 1.0f,
+
+	-0.25f,  0.25f,  0.25f, 1.0f,
+	-0.25f,  0.25f, -0.25f, 1.0f,
+	-0.25f, -0.25f, -0.25f, 1.0f,
+
+	-0.25f,  0.25f,  0.25f, 1.0f,
+	-0.25f, -0.25f, -0.25f, 1.0f,
+	-0.25f, -0.25f,  0.25f, 1.0f,
+
+	 0.25f,  0.25f,  0.25f, 1.0f,
+	 0.25f, -0.25f, -0.25f, 1.0f,
+	 0.25f,  0.25f, -0.25f, 1.0f,
+
+	 0.25f,  0.25f,  0.25f, 1.0f,
+	 0.25f, -0.25f,  0.25f, 1.0f,
+	 0.25f, -0.25f, -0.25f, 1.0f,
+
+	 0.25f, -0.25f,  0.25f, 1.0f,
+	 0.25f,  0.25f,  0.25f, 1.0f,
+	-0.25f,  0.25f,  0.25f, 1.0f,
+
+	 0.25f, -0.25f,  0.25f, 1.0f,
+	-0.25f,  0.25f,  0.25f, 1.0f,
+	-0.25f, -0.25f,  0.25f, 1.0f,
+
+	 0.25f, -0.25f, -0.25f, 1.0f,
+	-0.25f,  0.25f, -0.25f, 1.0f,
+	 0.25f,  0.25f, -0.25f, 1.0f,
+
+	 0.25f, -0.25f, -0.25f, 1.0f,
+	-0.25f, -0.25f,  0.25f, 1.0f,
+	-0.25f, -0.25f, -0.25f, 1.0f,
+
+
+    //colors
+
 	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+
 };
 
 //the rotate we'll pass to the GLSL
@@ -275,6 +367,13 @@ void loadAssets()
 	glBindVertexArray(vao); //make the VAO active
 	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
 
+
+    //setup face culling details.
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW); //front faces are counter-clockwise
+
+
 	cout << "Loaded Assets OK!\n";
 }
 
@@ -285,8 +384,11 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 	float rotate = (float)simLength * rotateSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
 
 	//modify the rotateMatrix with the rotate, as a rotate, around the z-axis
+	const glm::vec3 unitX = glm::vec3(1, 0, 0);
+	const glm::vec3 unitY = glm::vec3(0, 1, 0);
 	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
-	rotateMatrix = glm::rotate(rotateMatrix, rotate, unitZ);
+	const glm::vec3 unit45 = glm::normalize(glm::vec3(0, 1, 1));
+	rotateMatrix = glm::rotate(rotateMatrix, rotate, unit45);
 }
 
 void render()
@@ -297,15 +399,16 @@ void render()
 	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //uploaed the rotateMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
+    size_t colorData = sizeof(vertexData) / 2;
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
 
 	glEnableVertexAttribArray(positionLocation);
     glEnableVertexAttribArray(colorLocation);
 
 	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
-	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)48); //define **how** values are reader from positionBufferObject in Attrib 1
+	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorData); //define **how** values are reader from positionBufferObject in Attrib 1
 
-	glDrawArrays(GL_TRIANGLES, 0, 3); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
 
 	glDisableVertexAttribArray(0); //cleanup
 	glUseProgram(0); //clean up
