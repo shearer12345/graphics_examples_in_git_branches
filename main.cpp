@@ -4,7 +4,9 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
-#include <glm/glm.hpp>
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp> //include the main glm header
 
 using namespace std;
 
