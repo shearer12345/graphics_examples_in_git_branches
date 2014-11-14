@@ -410,7 +410,10 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 	modelMatrix = translationMatrix * rotationMatrix;
 
     //this doesn't seem to be quite right. x-axis seems backwards
-    viewMatrix = glm::lookAt(glm::vec3(-10, 0, 0), glm::vec3(0, 0, -10), glm::vec3(0, -1, 0));
+    glm::vec3 eyePoint = glm::vec3(-10, 0, 0);
+    glm::vec3 lookAtPoint = glm::vec3(0, 0, 0);
+    glm::vec3 upVector = glm::vec3(  0, 1, 0);
+    viewMatrix = glm::lookAt(eyePoint, lookAtPoint, upVector);
 
     float fovyRadians = glm::degrees(40.0f);
     float aspectRatio = 1.0f;
