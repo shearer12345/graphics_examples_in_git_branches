@@ -64,53 +64,55 @@ bool done = false;
 const float vertexData[] = {
 
     //positions
-	 0.25f, 0.25f,   0.25f,1.0f,
-	 0.25f, 0.25f,  -0.25f,1.0f,
-	-0.25f, 0.25f,   0.25f,1.0f,
-
-	 0.25f, 0.25f,  -0.25f,1.0f,
-	-0.25f, 0.25f,  -0.25f,1.0f,
-	-0.25f, 0.25f,   0.25f,1.0f,
-
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f, -0.25f, 1.0f,
-
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
 	-0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
 
-	-0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f,  0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
 
-	-0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
+     0.25f,  0.25f, -0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
 
-	 0.25f,  0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	 0.25f,  0.25f, -0.25f, 1.0f,
+     0.25f,  0.25f, -0.25f, 1.0f,
+     0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
 
-	 0.25f,  0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f, -0.25f, -0.25f, 1.0f,
 
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	 0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
 
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	-0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
 
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f,  0.25f, -0.25f, 1.0f,
-	 0.25f,  0.25f, -0.25f, 1.0f,
+     0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
 
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f,  0.25f, -0.25f, 1.0f,
+
+     0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
+
+     0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f,  0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
+
+     0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+
+
 
 
     //colors
@@ -172,8 +174,8 @@ glm::mat4 projectionMatrix; // the projectionMatrix for our "camera"
 glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the identity matrix by default
 glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
 
-float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
-glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, 0.0f);
+float rotateSpeed = 3.0f; //rate of change of the rotate - in radians per second
+glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, -0.4f);
 
 //our GL and GLSL variables
 
@@ -376,12 +378,10 @@ void loadAssets()
 	glBindVertexArray(vao); //make the VAO active
 	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
 
-
     //setup face culling details.
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW); //front faces are counter-clockwise
-
 
 	cout << "Loaded Assets OK!\n";
 }
@@ -405,10 +405,15 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 
 	modelMatrix = translationMatrix * rotationMatrix;
 
-    //this creates a projectionMatrix which does exactly nothing
-    //- this is the default projection (which is no projection)
-    //- we could equivalently set the projectionMatrix to the identity matrix
-	projectionMatrix = glm::ortho(-1, 1, -1, 1, -1, 1);
+    float fovyRadians = glm::degrees(40.0f);
+    float aspectRatio = 1.0f;
+    float nearClipPlane = 0.1f;
+    float farClipPlane = 100.0f;
+    //this creates a projectionMatrix which provides a perspective projection
+    //- the default perspective projection looks from the origin, down the negative z-axis
+    //- we need to make sure the cube will be in the view frustum
+    //  - easiest down, for here, by constantly moving it away (decreasing the z-value) using translateSpeed
+    projectionMatrix = glm::perspective(fovyRadians, aspectRatio, nearClipPlane, farClipPlane);
 }
 
 void render()
@@ -462,7 +467,7 @@ int main( int argc, char* args[] )
 	loadAssets();
 
 
-	while (!done && (SDL_GetTicks() < 15000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
+	while (!done && (SDL_GetTicks() < 5000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
 		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
 	{
 		//GET INPUT HERE - PLACEHOLDER
