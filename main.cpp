@@ -179,6 +179,11 @@ glm::mat4 translationMatrix; // the translationMatrix for our object - which is 
 float rotateSpeed = 3.0f; //rate of change of the rotate - in radians per second
 glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, -0.4f);
 
+glm::vec3 eyePoint = glm::vec3(-10, 0, 0);
+glm::vec3 lookAtPoint = glm::vec3(0, 0, 0);
+glm::vec3 upVector = glm::vec3(  0, 1, 0);
+
+
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
@@ -410,9 +415,7 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 	modelMatrix = translationMatrix * rotationMatrix;
 
     //this doesn't seem to be quite right. x-axis seems backwards
-    glm::vec3 eyePoint = glm::vec3(-10, 0, 0);
-    glm::vec3 lookAtPoint = glm::vec3(0, 0, 0);
-    glm::vec3 upVector = glm::vec3(  0, 1, 0);
+
     viewMatrix = glm::lookAt(eyePoint, lookAtPoint, upVector);
 
     float fovyRadians = glm::degrees(40.0f);
