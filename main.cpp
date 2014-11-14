@@ -32,11 +32,12 @@ const std::string strVertexShader(
 	"in vec4 position;\n"
 	"in vec4 color;\n"
 	"uniform mat4 modelMatrix;\n"
+	"uniform mat4 viewMatrix;\n"
 	"uniform mat4 projectionMatrix;\n"
 	"smooth out vec4 theColor;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = projectionMatrix * modelMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
+	"   gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
 	"   theColor = color;\n" //just pass on the color. It's a **smooth**, so will be interpolated
 	"}\n"
 	);
@@ -169,6 +170,7 @@ const float vertexData[] = {
 
 //the rotate we'll pass to the GLSL
 glm::mat4 modelMatrix; // the modelMatrix for our object - which is the identity matrix by default
+glm::mat4 viewMatrix; // the modelMatrix for our object - which is the identity matrix by default
 glm::mat4 projectionMatrix; // the projectionMatrix for our "camera"
 
 glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the identity matrix by default
@@ -183,6 +185,7 @@ GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (onl
 GLint positionLocation; //GLint that we'll fill in with the location of the `position` attribute in the GLSL
 GLint colorLocation; //GLint that we'll fill in with the location of the `color` attribute in the GLSL
 GLint modelMatrixLocation; //GLint that we'll fill in with the location of the `modelMatrix` uniform in the GLSL
+GLint viewMatrixLocation; //GLint that we'll fill in with the location of the `modelMatrix` uniform in the GLSL
 GLint projectionMatrixLocation; //GLint that we'll fill in with the location of the `projectionMatrix` uniform in the GLSL
 
 GLuint vertexBufferObject;
@@ -352,6 +355,7 @@ void initializeProgram()
 	positionLocation = glGetAttribLocation(theProgram, "position");
 	colorLocation = glGetAttribLocation(theProgram, "color");
 	modelMatrixLocation = glGetUniformLocation(theProgram, "modelMatrix");
+	viewMatrixLocation = glGetUniformLocation(theProgram, "viewMatrix");
 	projectionMatrixLocation = glGetUniformLocation(theProgram, "projectionMatrix");
 
 	//clean up shaders (we don't need them anymore as they are no in theProgram
@@ -405,6 +409,9 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 
 	modelMatrix = translationMatrix * rotationMatrix;
 
+    //this doesn't seem to be quite right. x-axis seems backwards
+    viewMatrix = glm::lookAt(glm::vec3(-10, 0, 0), glm::vec3(0, 0, -10), glm::vec3(0, -1, 0));
+
     float fovyRadians = glm::degrees(40.0f);
     float aspectRatio = 1.0f;
     float nearClipPlane = 0.1f;
@@ -422,6 +429,9 @@ void render()
 
 	//load data to GLSL that **may** have changed
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix)); //uploaed the modelMatrix to the appropriate uniform location
+	           // upload only one matrix, and don't transpose it
+
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix)); //uploaed the modelMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
     glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix)); //uploaed the projectionMatrix to the appropriate uniform location
