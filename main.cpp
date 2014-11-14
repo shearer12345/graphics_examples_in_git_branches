@@ -32,10 +32,11 @@ const std::string strVertexShader(
 	"in vec4 position;\n"
 	"in vec4 color;\n"
 	"uniform mat4 modelMatrix;\n"
+	"uniform mat4 projectionMatrix;\n"
 	"smooth out vec4 theColor;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = modelMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
+	"   gl_Position = projectionMatrix * modelMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
 	"   theColor = color;\n" //just pass on the color. It's a **smooth**, so will be interpolated
 	"}\n"
 	);
@@ -165,7 +166,8 @@ const float vertexData[] = {
 };
 
 //the rotate we'll pass to the GLSL
-glm::mat4 modelMatrix; // the transformation matrix for our object - which is the identity matrix by default
+glm::mat4 modelMatrix; // the modelMatrix for our object - which is the identity matrix by default
+glm::mat4 projectionMatrix; // the projectionMatrix for our "camera"
 
 glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the identity matrix by default
 glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
@@ -176,9 +178,10 @@ glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, 0.0f);
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
-GLint positionLocation; //GLuint that we'll fill in with the location of the `position` attribute in the GLSL
-GLint colorLocation; //GLuint that we'll fill in with the location of the `color` attribute in the GLSL
-GLint modelMatrixLocation; //GLuint that we'll fill in with the location of the `modelMatrix` variable in the GLSL
+GLint positionLocation; //GLint that we'll fill in with the location of the `position` attribute in the GLSL
+GLint colorLocation; //GLint that we'll fill in with the location of the `color` attribute in the GLSL
+GLint modelMatrixLocation; //GLint that we'll fill in with the location of the `modelMatrix` uniform in the GLSL
+GLint projectionMatrixLocation; //GLint that we'll fill in with the location of the `projectionMatrix` uniform in the GLSL
 
 GLuint vertexBufferObject;
 GLuint vao;
@@ -347,6 +350,8 @@ void initializeProgram()
 	positionLocation = glGetAttribLocation(theProgram, "position");
 	colorLocation = glGetAttribLocation(theProgram, "color");
 	modelMatrixLocation = glGetUniformLocation(theProgram, "modelMatrix");
+	projectionMatrixLocation = glGetUniformLocation(theProgram, "projectionMatrix");
+
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
@@ -392,13 +397,18 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 	const glm::vec3 unitY = glm::vec3(0, 1, 0);
 	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
 	const glm::vec3 unit45 = glm::normalize(glm::vec3(0, 1, 1));
-	
+
 	rotationMatrix = glm::rotate(rotationMatrix, rotate, unit45);
 
 	glm::vec3 translate = float(simLength) * translateSpeed; //scale the translationSpeed by time to get the translation amount
 	translationMatrix = glm::translate(translationMatrix, translate);
 
 	modelMatrix = translationMatrix * rotationMatrix;
+
+    //this creates a projectionMatrix which does exactly nothing
+    //- this is the default projection (which is no projection)
+    //- we could equivalently set the projectionMatrix to the identity matrix
+	projectionMatrix = glm::ortho(-1, 1, -1, 1, -1, 1);
 }
 
 void render()
@@ -408,6 +418,10 @@ void render()
 	//load data to GLSL that **may** have changed
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix)); //uploaed the modelMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
+
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix)); //uploaed the projectionMatrix to the appropriate uniform location
+	           // upload only one matrix, and don't transpose it
+
 
     size_t colorData = sizeof(vertexData) / 2;
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
