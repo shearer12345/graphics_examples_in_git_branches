@@ -169,8 +169,10 @@ glm::mat4 modelMatrix; // the transformation matrix for our object - which is th
 
 glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the identity matrix by default
 glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
+glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f); // the translationMatrix for our object - which is the identity matrix by default
 
 float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
+glm::vec3 scaleSpeed = glm::vec3(0.2f, 0.1f, 0.0f); //rate of change of the scale
 glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, 0.0f);
 
 //our GL and GLSL variables
@@ -392,22 +394,28 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 	const glm::vec3 unitY = glm::vec3(0, 1, 0);
 	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
 	const glm::vec3 unit45 = glm::normalize(glm::vec3(0, 1, 1));
-	
+
 	rotationMatrix = glm::rotate(rotationMatrix, rotate, unit45);
 
 	glm::vec3 translate = float(simLength) * translateSpeed; //scale the translationSpeed by time to get the translation amount
 	translationMatrix = glm::translate(translationMatrix, translate);
 
-	modelMatrix = translationMatrix * rotationMatrix;
+    scale = scale + (float)simLength * scaleSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
+
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(), scale);
+	//modelMatrix = translationMatrix ;
+	//modelMatrix =  rotationMatrix;
+	modelMatrix = translationMatrix * rotationMatrix *  scaleMatrix;
 }
 
 void render()
 {
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
+
 	//load data to GLSL that **may** have changed
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix)); //uploaed the modelMatrix to the appropriate uniform location
-	           // upload only one matrix, and don't transpose it
+	     // upload only one matrix, and don't transpose it
 
     size_t colorData = sizeof(vertexData) / 2;
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
