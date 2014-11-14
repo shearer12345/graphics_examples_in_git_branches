@@ -173,7 +173,7 @@ glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the id
 glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
 
 float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
-glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, 0.0f);
+glm::vec3 translateSpeed = glm::vec3(0.0f, 0.0f, 0.0f);
 
 //our GL and GLSL variables
 
@@ -438,6 +438,14 @@ void render()
 	glUseProgram(0); //clean up
 
 }
+void handleInput()
+{
+
+    //TODO
+
+}
+
+
 void cleanUp()
 {
 	SDL_GL_DeleteContext(context);
@@ -465,7 +473,8 @@ int main( int argc, char* args[] )
 	while (!done && (SDL_GetTicks() < 15000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
 		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
 	{
-		//GET INPUT HERE - PLACEHOLDER
+		handleInput(); //this should get input from the system (keyboard, mouse, network, whatever) and set control variables
+                    //- e.g. set the speed to go left if left is pressed, right if right is pressed, and neither if neither or both
 
 		updateSimulation(0.02); //call update simulation with an amount of time to simulate for (in seconds)
 		  //WARNING - we are always updating by a constant amount of time. This should be tied to how long has elapsed
