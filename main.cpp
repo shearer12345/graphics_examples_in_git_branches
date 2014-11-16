@@ -173,7 +173,9 @@ glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the id
 glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
 
 float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
-glm::vec3 translateSpeed = glm::vec3(0.0f, 0.0f, 0.0f);
+
+glm::vec3 translateSpeed = glm::vec3(0.0f, 0.0f, 0.0f);;
+glm::vec3 translateAcceleration = glm::vec3(0.5f, 0.5f, 0.5f);;
 
 //our GL and GLSL variables
 
@@ -440,9 +442,76 @@ void render()
 }
 void handleInput()
 {
+    //Event-based input handling
+    //The underlying OS is event-based, so **each** key-up or key-down (for example)
+    //generates an event.
+    //  - https://wiki.libsdl.org/SDL_PollEvent
+    //In some scenarios we want to catch **ALL** the events, not just to present state
+    //  - for instance, if taking keyboard input the user might key-down two keys during a frame
+    //    - we want to catch based, and know the order
+    //  - or the user might key-down and key-up the same within a frame, and we still want something to happen (e.g. jump)
+    //  - the alternative is to Poll the current state with SDL_GetKeyboardState
 
-    //TODO
+    SDL_Event event; //somewhere to store an event
 
+    //NOTE: there may be multiple events per frame
+    while (SDL_PollEvent(&event)) { //loop until SDL_PollEvent returns 0 (meaning no more events)
+        switch (event.type)
+        {
+        case SDL_QUIT:
+            done = true; //set done flag if SDL wants to quit (i.e. if the OS has triggered a close event,
+                         //  - such as window close, or SIGINT
+            break;
+
+        //keydown handling - we should to the opposite on key-up for direction controls (generally)
+        case SDL_KEYDOWN:
+            //Keydown can fire repeatable if key-repeat is on.
+            //  - the repeat flag is set on the keyboard event, if this is a repeat event
+            //  - in our case, we're going to ignore repeat events
+            //  - https://wiki.libsdl.org/SDL_KeyboardEvent
+            if (!event.key.repeat)
+            switch (event.key.keysym.sym)
+            {
+                //hit escape to exit
+                case SDLK_ESCAPE: done = true;
+
+                //movement handling
+                //  - this is the simplest way of going this, but could be improved
+                //    - lookup a keymapping in a table (so control keys can be changed)
+                //    - rather than setting a "physics" value directly, instead just set a control variable
+                //      - some kind of enumerated type
+                //      - then separately use those enumerated types to set the physics values
+                case SDLK_LEFT:  translateSpeed.x -= translateAcceleration.x; break;
+                case SDLK_RIGHT: translateSpeed.x += translateAcceleration.x; break;
+
+                case SDLK_UP:    translateSpeed.y += translateAcceleration.y; break;
+                case SDLK_DOWN:  translateSpeed.y -= translateAcceleration.y; break;
+
+
+
+            }
+            break;
+
+        //keyup handling
+        case SDL_KEYUP:
+            switch (event.key.keysym.sym)
+            {
+                case SDLK_LEFT:  translateSpeed.x += translateAcceleration.x; break;
+                case SDLK_RIGHT: translateSpeed.x -= translateAcceleration.x; break;
+
+                case SDLK_UP:    translateSpeed.y -= translateAcceleration.y; break;
+                case SDLK_DOWN:  translateSpeed.y += translateAcceleration.y; break;
+            }
+            break;
+
+
+
+
+
+        default: //good practice to always have a default case
+            break;
+        }
+    }
 }
 
 
@@ -470,7 +539,7 @@ int main( int argc, char* args[] )
 	loadAssets();
 
 
-	while (!done && (SDL_GetTicks() < 15000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
+	while (!done) //we now have keyboard handling, so will exit on escape
 		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
 	{
 		handleInput(); //this should get input from the system (keyboard, mouse, network, whatever) and set control variables
