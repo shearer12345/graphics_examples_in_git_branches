@@ -6,6 +6,8 @@
 #include <SDL.h>
 #include <glm/glm.hpp>
 
+#include "cubeWithColor.h"
+
 using namespace std;
 
 /////////////////////
@@ -15,6 +17,7 @@ std::string exeName;
 SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
+
 
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
@@ -36,11 +39,7 @@ const std::string strFragmentShader(
 	"}\n"
 	);
 
-const float vertexPositions[] = {
-	0.0f, 0.5f, 0.0f, 1.0f,
-	-0.4330127f, -0.25f, 0.0f, 1.0f,
-	0.4330127f, -0.25f, 0.0f, 1.0f,
-};
+
 
 GLuint positionBufferObject;
 GLuint vao;
@@ -206,7 +205,7 @@ void initializeVertexBuffer()
 	glGenBuffers(1, &positionBufferObject);
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeWithColor), cubeWithColor, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	cout << "positionBufferObject created OK! GLUint is: " << positionBufferObject << std::endl;
 }
@@ -235,7 +234,9 @@ void render()
 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
 
-	glDrawArrays(GL_TRIANGLES, 0, 3); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+	//This is a cube, but we can only see the front face
+	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 36 vertices.
+
 
 	glDisableVertexAttribArray(0); //cleanup
 	glUseProgram(0); //clean up
