@@ -5,8 +5,12 @@
 #include <GL/glew.h>
 #include <SDL.h>
 
-#define GLM_FORCE_RADIANS
+#define GLM_FORCE_RADIANS //force glm to use radians //must do **before** including GLM headers
+//NOTE: GLSL uses radians, so will do the same, for consistency
+
 #include <glm/glm.hpp> //include the main glm header
+#include <glm/gtc/matrix_transform.hpp> //include functions to ease the calculation of the view and projection matrices
+#include <glm/gtc/type_ptr.hpp> //include functionality for converting a matrix object into a float array for usage in OpenGL
 
 using namespace std;
 
