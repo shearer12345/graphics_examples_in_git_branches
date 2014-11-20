@@ -174,8 +174,9 @@ glm::mat4 translationMatrix; // the translationMatrix for our object - which is 
 
 float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
 
-glm::vec3 translateSpeed = glm::vec3(0.0f, 0.0f, 0.0f);;
-glm::vec3 translateAcceleration = glm::vec3(0.5f, 0.5f, 0.5f);;
+glm::vec3 translateSpeedDefault = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 translateSpeed = translateSpeedDefault;
+glm::vec3 translateAcceleration = glm::vec3(0.5f, 0.5f, 0.5f);
 
 //our GL and GLSL variables
 
@@ -442,76 +443,61 @@ void render()
 }
 void handleInput()
 {
-    //Event-based input handling
-    //The underlying OS is event-based, so **each** key-up or key-down (for example)
-    //generates an event.
-    //  - https://wiki.libsdl.org/SDL_PollEvent
-    //In some scenarios we want to catch **ALL** the events, not just to present state
-    //  - for instance, if taking keyboard input the user might key-down two keys during a frame
-    //    - we want to catch based, and know the order
-    //  - or the user might key-down and key-up the same within a frame, and we still want something to happen (e.g. jump)
-    //  - the alternative is to Poll the current state with SDL_GetKeyboardState
+	//Poll-based input handling
+	//The underlying OS is event-based, so **each** key-up or key-down (for example)
+	//generates an event.
+	//We can handle all the events (https://wiki.libsdl.org/SDL_PollEvent), but in simple scenarios, poll-based is fine
+	//  - poll-based **may** miss events, 
+	//we use SDL_GetKeyboardState (https://wiki.libsdl.org/SDL_GetKeyboardState)
 
-    SDL_Event event; //somewhere to store an event
+	//SDL_GetKeyboardState current state after all events have been processed, so first we have to pump the events list
+	//If **also** processing events, you should process events BEFORE here
+	SDL_PumpEvents();
 
-    //NOTE: there may be multiple events per frame
-    while (SDL_PollEvent(&event)) { //loop until SDL_PollEvent returns 0 (meaning no more events)
-        switch (event.type)
-        {
-        case SDL_QUIT:
-            done = true; //set done flag if SDL wants to quit (i.e. if the OS has triggered a close event,
-                         //  - such as window close, or SIGINT
-            break;
+	const Uint8 *state = SDL_GetKeyboardState(NULL); //somewhere to store an event
 
-        //keydown handling - we should to the opposite on key-up for direction controls (generally)
-        case SDL_KEYDOWN:
-            //Keydown can fire repeatable if key-repeat is on.
-            //  - the repeat flag is set on the keyboard event, if this is a repeat event
-            //  - in our case, we're going to ignore repeat events
-            //  - https://wiki.libsdl.org/SDL_KeyboardEvent
-            if (!event.key.repeat)
-            switch (event.key.keysym.sym)
-            {
-                //hit escape to exit
-                case SDLK_ESCAPE: done = true;
+	//Note: we can no longer handle the SDL_QUIT event
 
-                //movement handling
-                //  - this is the simplest way of going this, but could be improved
-                //    - lookup a keymapping in a table (so control keys can be changed)
-                //    - rather than setting a "physics" value directly, instead just set a control variable
-                //      - some kind of enumerated type
-                //      - then separately use those enumerated types to set the physics values
-                case SDLK_LEFT:  translateSpeed.x -= translateAcceleration.x; break;
-                case SDLK_RIGHT: translateSpeed.x += translateAcceleration.x; break;
+	//is keydown handling - scancodes are set in a Uint8 array if a key is down (when SDL_PumpEvents() last ran)
+	if (state[SDL_SCANCODE_ESCAPE])
+		done = true; //hit escape to exit
 
-                case SDLK_UP:    translateSpeed.y += translateAcceleration.y; break;
-                case SDLK_DOWN:  translateSpeed.y -= translateAcceleration.y; break;
+	//movement handling
+	//  - this is the simplest way of going this, but could be improved
+	//    - lookup a keymapping in a table (so control keys can be changed)
+	//    - rather than setting a "physics" value directly, instead just set a control variable
+	//      - some kind of enumerated type
+	//      - then separately use those enumerated types to set the physics values
+
+	//3 control states from the two keys (Left and Right)
+	//  - move left, when just left pressed
+	//  - move right, when just right pressed
+	//  - don't move, when neither of both pressed
+	if (state[SDL_SCANCODE_LEFT] != state[SDL_SCANCODE_RIGHT]) //just one pressed
+	{
+		if (state[SDL_SCANCODE_LEFT]) //left pressed
+			translateSpeed.x = translateSpeedDefault.x - translateAcceleration.x;
+		else //right pressed
+			translateSpeed.x = translateSpeedDefault.x + translateAcceleration.x;
+	}
+	else
+		translateSpeed.x = translateSpeedDefault.x;
 
 
+	//3 control states from the two keys (Up and Dowm)
+	//  - move Up, when just Up pressed
+	//  - move Dowm, when just Dowm pressed
+	//  - don't move, when neither of both pressed
+	if (state[SDL_SCANCODE_UP] != state[SDL_SCANCODE_DOWN]) //just one pressed
+	{
+		if (state[SDL_SCANCODE_DOWN]) //left pressed
+			translateSpeed.y = translateSpeedDefault.y - translateAcceleration.y;
+		else //right pressed
+			translateSpeed.y = translateSpeedDefault.y + translateAcceleration.y;
+	}
+	else
+		translateSpeed.y = translateSpeedDefault.y;
 
-            }
-            break;
-
-        //keyup handling
-        case SDL_KEYUP:
-            switch (event.key.keysym.sym)
-            {
-                case SDLK_LEFT:  translateSpeed.x += translateAcceleration.x; break;
-                case SDLK_RIGHT: translateSpeed.x -= translateAcceleration.x; break;
-
-                case SDLK_UP:    translateSpeed.y -= translateAcceleration.y; break;
-                case SDLK_DOWN:  translateSpeed.y += translateAcceleration.y; break;
-            }
-            break;
-
-
-
-
-
-        default: //good practice to always have a default case
-            break;
-        }
-    }
 }
 
 
