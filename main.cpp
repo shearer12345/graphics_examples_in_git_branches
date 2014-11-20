@@ -168,15 +168,25 @@ const float vertexData[] = {
 };
 
 //the rotate we'll pass to the GLSL
-glm::mat4 modelMatrix; // the modelMatrix for our object - which is the identity matrix by default
-glm::mat4 viewMatrix; // the viewMatrix for our "camera" - which is the identity matrix by default
 
+//cube1 params
+glm::mat4 modelMatrix; // the modelMatrix for our object - which is the identity matrix by default
 glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the identity matrix by default
 glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
 
 float rotateSpeed = 3.0f; //rate of change of the rotate - in radians per second
 glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, 0.0f);
 
+//cube2 params
+glm::mat4 modelMatrix2; // the modelMatrix for our object - which is the identity matrix by default
+glm::mat4 rotationMatrix2; // the rotationMatrix for our object - which is the identity matrix by default
+glm::mat4 translationMatrix2; // the translationMatrix for our object - which is the identity matrix by default
+
+float rotateSpeed2 = 6.0f; //rate of change of the rotate - in radians per second
+glm::vec3 translateSpeed2 = glm::vec3(-0.2f, -0.2f, 0.0f);
+
+
+glm::mat4 viewMatrix; // the viewMatrix for our "camera" - which is the identity matrix by default
 
 //our GL and GLSL variables
 
@@ -390,25 +400,38 @@ void loadAssets()
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
 {
 
-	//calculate the amount of rotate for this timestep
-	float rotate = (float)simLength * rotateSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
-
-	//modify the rotationMatrix with the rotate, as a rotate, around the z-axis
 	const glm::vec3 unitX = glm::vec3(1, 0, 0);
 	const glm::vec3 unitY = glm::vec3(0, 1, 0);
 	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
 	const glm::vec3 unit45 = glm::normalize(glm::vec3(0, 1, 1));
 
-	rotationMatrix = glm::rotate(rotationMatrix, rotate, unit45);
+	//cube 1
+		//calculate the amount of rotate for this timestep
+		float rotate = (float)simLength * rotateSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
 
-	glm::vec3 translate = float(simLength) * translateSpeed; //scale the translationSpeed by time to get the translation amount
-	translationMatrix = glm::translate(translationMatrix, translate);
+		//modify the rotationMatrix with the rotate, as a rotate, around the z-axis
+		rotationMatrix = glm::rotate(rotationMatrix, rotate, unit45);
 
-	modelMatrix = translationMatrix * rotationMatrix;
+		glm::vec3 translate = float(simLength) * translateSpeed; //scale the translationSpeed by time to get the translation amount
+		translationMatrix = glm::translate(translationMatrix, translate);
 
-	float cameraUpDown = 0.25f * cosf(SDL_GetTicks() / 100.0f);
-	viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, cameraUpDown, 0.0f));
+		modelMatrix = translationMatrix * rotationMatrix;
 
+	//cube 2
+		//calculate the amount of rotate for this timestep
+		float rotate2 = (float)simLength * rotateSpeed2; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
+
+		//modify the rotationMatrix with the rotate, as a rotate, around the z-axis
+		rotationMatrix2 = glm::rotate(rotationMatrix2, rotate2, unit45);
+
+		glm::vec3 translate2 = float(simLength) * translateSpeed2; //scale the translationSpeed by time to get the translation amount
+		translationMatrix2 = glm::translate(translationMatrix2, translate2);
+
+		modelMatrix2 = translationMatrix2 * rotationMatrix2;
+
+	//viewMatrix
+		float cameraUpDown = 0.25f * cosf(SDL_GetTicks() / 100.0f);
+		viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, cameraUpDown, 0.0f));
 
 }
 
@@ -417,6 +440,7 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
+	//cube1 modelMatrix
 	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix)); //uploaed the modelMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
@@ -434,6 +458,10 @@ void render()
 	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
 	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorData); //define **how** values are reader from positionBufferObject in Attrib 1
 
+	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+
+	//cube1 modelMatrix
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix2)); //uploaed the modelMatrix to the appropriate uniform location
 	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
 
 	glDisableVertexAttribArray(0); //cleanup
