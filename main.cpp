@@ -33,11 +33,10 @@ const std::string strVertexShader(
 	"in vec4 color;\n"
 	"uniform mat4 modelMatrix;\n"
 	"uniform mat4 viewMatrix;\n"
-	"uniform mat4 projectionMatrix;\n"
 	"smooth out vec4 theColor;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
+	"   gl_Position = viewMatrix * modelMatrix * position;\n"
 	"   theColor = color;\n" //just pass on the color. It's a **smooth**, so will be interpolated
 	"}\n"
 	);
@@ -170,18 +169,13 @@ const float vertexData[] = {
 
 //the rotate we'll pass to the GLSL
 glm::mat4 modelMatrix; // the modelMatrix for our object - which is the identity matrix by default
-glm::mat4 viewMatrix; // the modelMatrix for our object - which is the identity matrix by default
-glm::mat4 projectionMatrix; // the projectionMatrix for our "camera"
+glm::mat4 viewMatrix; // the viewMatrix for our "camera" - which is the identity matrix by default
 
 glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the identity matrix by default
 glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
 
 float rotateSpeed = 3.0f; //rate of change of the rotate - in radians per second
-glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, -0.4f);
-
-glm::vec3 eyePoint = glm::vec3(-10, 0, 0);
-glm::vec3 lookAtPoint = glm::vec3(0, 0, 0);
-glm::vec3 upVector = glm::vec3(  0, 1, 0);
+glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, 0.0f);
 
 
 //our GL and GLSL variables
@@ -191,7 +185,6 @@ GLint positionLocation; //GLint that we'll fill in with the location of the `pos
 GLint colorLocation; //GLint that we'll fill in with the location of the `color` attribute in the GLSL
 GLint modelMatrixLocation; //GLint that we'll fill in with the location of the `modelMatrix` uniform in the GLSL
 GLint viewMatrixLocation; //GLint that we'll fill in with the location of the `modelMatrix` uniform in the GLSL
-GLint projectionMatrixLocation; //GLint that we'll fill in with the location of the `projectionMatrix` uniform in the GLSL
 
 GLuint vertexBufferObject;
 GLuint vao;
@@ -361,7 +354,6 @@ void initializeProgram()
 	colorLocation = glGetAttribLocation(theProgram, "color");
 	modelMatrixLocation = glGetUniformLocation(theProgram, "modelMatrix");
 	viewMatrixLocation = glGetUniformLocation(theProgram, "viewMatrix");
-	projectionMatrixLocation = glGetUniformLocation(theProgram, "projectionMatrix");
 
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
@@ -414,19 +406,10 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 
 	modelMatrix = translationMatrix * rotationMatrix;
 
-    //this doesn't seem to be quite right. x-axis seems backwards
+	float cameraUpDown = 0.25f * cosf(SDL_GetTicks() / 100.0f);
+	viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, cameraUpDown, 0.0f));
 
-    viewMatrix = glm::lookAt(eyePoint, lookAtPoint, upVector);
 
-    float fovyRadians = glm::degrees(40.0f);
-    float aspectRatio = 1.0f;
-    float nearClipPlane = 0.1f;
-    float farClipPlane = 100.0f;
-    //this creates a projectionMatrix which provides a perspective projection
-    //- the default perspective projection looks from the origin, down the negative z-axis
-    //- we need to make sure the cube will be in the view frustum
-    //  - easiest down, for here, by constantly moving it away (decreasing the z-value) using translateSpeed
-    projectionMatrix = glm::perspective(fovyRadians, aspectRatio, nearClipPlane, farClipPlane);
 }
 
 void render()
@@ -440,9 +423,7 @@ void render()
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix)); //uploaed the modelMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
-    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix)); //uploaed the projectionMatrix to the appropriate uniform location
-	           // upload only one matrix, and don't transpose it
-
+    
 
     size_t colorData = sizeof(vertexData) / 2;
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
