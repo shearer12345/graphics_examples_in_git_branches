@@ -30,11 +30,15 @@ const std::string strVertexShader(
 		"#version 140\n"
 	#endif
 	"in vec4 position;\n"
-	"uniform vec2 offset;\n"
+	"in vec4 color;\n"
+	"uniform mat4 modelMatrix;\n"
+	"uniform mat4 viewMatrix;\n"
+	"uniform mat4 projectionMatrix;\n"
+	"smooth out vec4 theColor;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = position;\n"
-	"   gl_Position.xy += offset;\n"
+	"   gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
+	"   theColor = color;\n" //just pass on the color. It's a **smooth**, so will be interpolated
 	"}\n"
 	);
 
@@ -46,10 +50,11 @@ const std::string strFragmentShader(
 	#ifdef OPENGL_VERSION_3_3
 		"#version 140\n"
 	#endif
+	"smooth in vec4 theColor;\n"
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
-	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+	"   outputColor = theColor;\n"
 	"}\n"
 	);
 
@@ -57,25 +62,138 @@ const std::string strFragmentShader(
 //our variables
 bool done = false;
 
-const float vertexPositions[] = {
-	0.0f, 0.5f, 0.0f, 1.0f,
-	-0.4330127f, -0.25f, 0.0f, 1.0f,
-	0.4330127f, -0.25f, 0.0f, 1.0f,
+const float vertexData[] = {
+
+    //positions
+	-0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+
+    -0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
+
+     0.25f,  0.25f, -0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
+
+     0.25f,  0.25f, -0.25f, 1.0f,
+     0.25f, -0.25f, -0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
+
+     0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f, -0.25f, -0.25f, 1.0f,
+
+     0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f, -0.25f, 1.0f,
+
+    -0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f, -0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
+
+     0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
+
+     0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f,  0.25f, -0.25f, 1.0f,
+
+     0.25f, -0.25f, -0.25f, 1.0f,
+     0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f, -0.25f,  0.25f, 1.0f,
+
+     0.25f,  0.25f,  0.25f, 1.0f,
+     0.25f,  0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
+
+     0.25f,  0.25f,  0.25f, 1.0f,
+    -0.25f,  0.25f, -0.25f, 1.0f,
+    -0.25f,  0.25f,  0.25f, 1.0f,
+
+
+
+
+    //colors
+
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+	0.0f, 0.0f, 1.0f, 1.0f,
+
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+	0.8f, 0.8f, 0.8f, 1.0f,
+
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+	0.0f, 1.0f, 0.0f, 1.0f,
+
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+	0.5f, 0.5f, 0.0f, 1.0f,
+
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 0.0f, 1.0f,
+
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+	0.0f, 1.0f, 1.0f, 1.0f,
+
 };
 
-//the offset we'll pass to the GLSL
-double offsetX = -0.5; //using different values from CPU and static GLSL examples, to make it clear this is working
-double offsetY = -0.5; //NOTE: we could use an array and pass the pointer, to be simpler & more efficent
-double offsetXSpeed = 0.2; //rate of change of offsetX in units per second
-double offsetYSpeed = 0.2; //rate of change of offsetY in units per second
+//the rotate we'll pass to the GLSL
+glm::mat4 modelMatrix; // the modelMatrix for our object - which is the identity matrix by default
+glm::mat4 viewMatrix; // the modelMatrix for our object - which is the identity matrix by default
+glm::mat4 projectionMatrix; // the projectionMatrix for our "camera"
+
+glm::mat4 rotationMatrix; // the rotationMatrix for our object - which is the identity matrix by default
+glm::mat4 translationMatrix; // the translationMatrix for our object - which is the identity matrix by default
+
+float rotateSpeed = 3.0f; //rate of change of the rotate - in radians per second
+glm::vec3 translateSpeed = glm::vec3(0.1f, 0.1f, -0.4f);
+
+glm::vec3 eyePoint = glm::vec3(-10, 0, 0);
+glm::vec3 lookAtPoint = glm::vec3(0, 0, 0);
+glm::vec3 upVector = glm::vec3(  0, 1, 0);
+
 
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
-GLint positionLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
-GLint offsetLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
+GLint positionLocation; //GLint that we'll fill in with the location of the `position` attribute in the GLSL
+GLint colorLocation; //GLint that we'll fill in with the location of the `color` attribute in the GLSL
+GLint modelMatrixLocation; //GLint that we'll fill in with the location of the `modelMatrix` uniform in the GLSL
+GLint viewMatrixLocation; //GLint that we'll fill in with the location of the `modelMatrix` uniform in the GLSL
+GLint projectionMatrixLocation; //GLint that we'll fill in with the location of the `projectionMatrix` uniform in the GLSL
 
-GLuint positionBufferObject;
+GLuint vertexBufferObject;
 GLuint vao;
 
 // end Global Variables
@@ -240,19 +358,23 @@ void initializeProgram()
 	}
 
 	positionLocation = glGetAttribLocation(theProgram, "position");
-	offsetLocation = glGetUniformLocation(theProgram, "offset");
+	colorLocation = glGetAttribLocation(theProgram, "color");
+	modelMatrixLocation = glGetUniformLocation(theProgram, "modelMatrix");
+	viewMatrixLocation = glGetUniformLocation(theProgram, "viewMatrix");
+	projectionMatrixLocation = glGetUniformLocation(theProgram, "projectionMatrix");
+
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
 
 void initializeVertexBuffer()
 {
-	glGenBuffers(1, &positionBufferObject);
+	glGenBuffers(1, &vertexBufferObject);
 
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	cout << "positionBufferObject created OK! GLUint is: " << positionBufferObject << std::endl;
+	cout << "positionBufferObject created OK! GLUint is: " << vertexBufferObject << std::endl;
 }
 
 void loadAssets()
@@ -265,13 +387,46 @@ void loadAssets()
 	glBindVertexArray(vao); //make the VAO active
 	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
 
+    //setup face culling details.
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW); //front faces are counter-clockwise
+
 	cout << "Loaded Assets OK!\n";
 }
 
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
 {
-	offsetX += offsetXSpeed * simLength;
-	offsetY += offsetYSpeed * simLength;
+
+	//calculate the amount of rotate for this timestep
+	float rotate = (float)simLength * rotateSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
+
+	//modify the rotationMatrix with the rotate, as a rotate, around the z-axis
+	const glm::vec3 unitX = glm::vec3(1, 0, 0);
+	const glm::vec3 unitY = glm::vec3(0, 1, 0);
+	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
+	const glm::vec3 unit45 = glm::normalize(glm::vec3(0, 1, 1));
+
+	rotationMatrix = glm::rotate(rotationMatrix, rotate, unit45);
+
+	glm::vec3 translate = float(simLength) * translateSpeed; //scale the translationSpeed by time to get the translation amount
+	translationMatrix = glm::translate(translationMatrix, translate);
+
+	modelMatrix = translationMatrix * rotationMatrix;
+
+    //this doesn't seem to be quite right. x-axis seems backwards
+
+    viewMatrix = glm::lookAt(eyePoint, lookAtPoint, upVector);
+
+    float fovyRadians = glm::radians(40.0f);
+    float aspectRatio = 1.0f;
+    float nearClipPlane = 0.1f;
+    float farClipPlane = 100.0f;
+    //this creates a projectionMatrix which provides a perspective projection
+    //- the default perspective projection looks from the origin, down the negative z-axis
+    //- we need to make sure the cube will be in the view frustum
+    //  - easiest down, for here, by constantly moving it away (decreasing the z-value) using translateSpeed
+    projectionMatrix = glm::perspective(fovyRadians, aspectRatio, nearClipPlane, farClipPlane);
 }
 
 void render()
@@ -279,17 +434,26 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniform2f(offsetLocation, offsetX, offsetY);
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix)); //uploaed the modelMatrix to the appropriate uniform location
+	           // upload only one matrix, and don't transpose it
+
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix)); //uploaed the modelMatrix to the appropriate uniform location
+	           // upload only one matrix, and don't transpose it
+
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix)); //uploaed the projectionMatrix to the appropriate uniform location
+	           // upload only one matrix, and don't transpose it
 
 
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
+    size_t colorData = sizeof(vertexData) / 2;
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
 
-	glEnableVertexAttribArray(positionLocation); //this 0 corresponds to the location = 0 in the GLSL for the vertex shader.
-		//more generically, use glGetAttribLocation() after GLSL linking to obtain the assigned attribute location.
+	glEnableVertexAttribArray(positionLocation);
+    glEnableVertexAttribArray(colorLocation);
 
 	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
+	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorData); //define **how** values are reader from positionBufferObject in Attrib 1
 
-	glDrawArrays(GL_TRIANGLES, 0, 3); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
 
 	glDisableVertexAttribArray(0); //cleanup
 	glUseProgram(0); //clean up
