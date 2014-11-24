@@ -418,7 +418,7 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 
     viewMatrix = glm::lookAt(eyePoint, lookAtPoint, upVector);
 
-    float fovyRadians = glm::degrees(40.0f);
+    float fovyRadians = glm::radians(40.0f);
     float aspectRatio = 1.0f;
     float nearClipPlane = 0.1f;
     float farClipPlane = 100.0f;
