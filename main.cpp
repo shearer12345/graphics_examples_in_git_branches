@@ -270,6 +270,11 @@ void loadAssets()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
+	//setup face culling details.
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW); //front faces are counter-clockwise
+
 	cout << "Loaded Assets OK!\n";
 }
 
