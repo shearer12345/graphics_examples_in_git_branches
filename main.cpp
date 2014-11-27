@@ -266,6 +266,10 @@ void loadAssets()
 	glBindVertexArray(vao); //make the VAO active
 	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
 
+	//setup depth testing
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	cout << "Loaded Assets OK!\n";
 }
 
@@ -339,7 +343,7 @@ int main( int argc, char* args[] )
 		  //WARNING - we are always updating by a constant amount of time. This should be tied to how long has elapsed
 		    // see, for example, http://headerphile.blogspot.co.uk/2014/07/part-9-no-more-delays.html
 
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		render(); //RENDER HERE - PLACEHOLDER
 
