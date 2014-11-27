@@ -12,6 +12,9 @@
 #include <glm/gtc/matrix_transform.hpp> //include functions to ease the calculation of the view and projection matrices
 #include <glm/gtc/type_ptr.hpp> //include functionality for converting a matrix object into a float array for usage in OpenGL
 
+
+#include "cubeWithColor.h"
+
 using namespace std;
 
 /////////////////////
@@ -59,110 +62,6 @@ const std::string strFragmentShader(
 
 //our variables
 bool done = false;
-
-const float vertexData[] = {
-
-    //positions
-	 0.25f, 0.25f,   0.25f,1.0f,
-	 0.25f, 0.25f,  -0.25f,1.0f,
-	-0.25f, 0.25f,   0.25f,1.0f,
-
-	 0.25f, 0.25f,  -0.25f,1.0f,
-	-0.25f, 0.25f,  -0.25f,1.0f,
-	-0.25f, 0.25f,   0.25f,1.0f,
-
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f, -0.25f, 1.0f,
-
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f, -0.25f, 1.0f,
-
-	-0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f,  0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f, -0.25f, 1.0f,
-
-	-0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
-
-	 0.25f,  0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	 0.25f,  0.25f, -0.25f, 1.0f,
-
-	 0.25f,  0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	 0.25f, -0.25f, -0.25f, 1.0f,
-
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	 0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f,  0.25f,  0.25f, 1.0f,
-
-	 0.25f, -0.25f,  0.25f, 1.0f,
-	-0.25f,  0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
-
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f,  0.25f, -0.25f, 1.0f,
-	 0.25f,  0.25f, -0.25f, 1.0f,
-
-	 0.25f, -0.25f, -0.25f, 1.0f,
-	-0.25f, -0.25f,  0.25f, 1.0f,
-	-0.25f, -0.25f, -0.25f, 1.0f,
-
-
-    //colors
-
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-
-};
 
 //the rotate we'll pass to the GLSL
 glm::mat4 rotateMatrix; // the transformation matrix for our object - which is the identity matrix by default
@@ -352,7 +251,7 @@ void initializeVertexBuffer()
 	glGenBuffers(1, &vertexBufferObject);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeWithColor), cubeWithColor, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	cout << "positionBufferObject created OK! GLUint is: " << vertexBufferObject << std::endl;
 }
@@ -366,13 +265,6 @@ void loadAssets()
 	glGenVertexArrays(1, &vao); //create a Vertex Array Object
 	glBindVertexArray(vao); //make the VAO active
 	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
-
-
-    //setup face culling details.
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW); //front faces are counter-clockwise
-
 
 	cout << "Loaded Assets OK!\n";
 }
@@ -399,7 +291,7 @@ void render()
 	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //uploaed the rotateMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
-    size_t colorData = sizeof(vertexData) / 2;
+	size_t colorData = sizeof(cubeWithColor) / 2;
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
 
 	glEnableVertexAttribArray(positionLocation);
