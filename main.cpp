@@ -25,6 +25,8 @@ SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
 
 
+//http://www.gamedev.net/page/resources/_/technical/opengl/the-basics-of-glsl-40-shaders-r2861
+
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
 #ifdef OPENGL_VERSION_3_1
@@ -35,13 +37,27 @@ const std::string strVertexShader(
 #endif
 	"in vec4 position;\n"
 	"in vec4 color;\n"
-	"in vec2 normal;\n"
-	"uniform mat4 rotateMatrix;\n"
+	"in vec4 normal;\n"
+	"uniform mat4 modelMatrix;\n"
+	"uniform vec4 lightPosition = vec4(1.0, 0.0, 1.0, 1.0);\n" //just to be safe, in case we don't set the uniform
 	"smooth out vec4 theColor;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = rotateMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
-	"   theColor = color;\n" //just pass on the color. It's a **smooth**, so will be interpolated
+	"   mat4 viewMatrix = mat4(1.0);\n" //we're not passing in a view matrix at this point, but we eventually want to
+	"   mat4 projectionMatrix = mat4(1.0);\n" //we're not passing in a projection matrix at this point, but we eventually want to
+
+	"   gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;\n"
+
+	"   // Convert normal and lightPosition to eye coordinates\n"
+	"   vec4 normalCameraSpace = normalize(viewMatrix * modelMatrix * normal);\n" //normal is influenced by both the modelMatrix and viewMatrix
+	"   vec4 lightPositionCameraSpace = normalize(viewMatrix * lightPosition);\n" //lightPosition is only influenced by the viewMatrix
+
+	"   // compute the intensity of light, using the dot product\n"
+	"   float intensity = max(dot(normalCameraSpace, lightPositionCameraSpace), 0.0);\n"
+
+	"   // scale color by intensity\n"
+	"   theColor = color * intensity;\n" //just pass on the color. It's a **smooth**, so will be interpolated
+	
 	"}\n"
 	);
 
@@ -66,9 +82,10 @@ const std::string strFragmentShader(
 bool done = false;
 
 //the rotate we'll pass to the GLSL
-glm::mat4 rotateMatrix; // the transformation matrix for our object - which is the identity matrix by default
+glm::mat4 modelMatrix; // the transformation matrix for our object - which is the identity matrix by default
 float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
 
+glm::vec4 lightPosition = glm::vec4(-1.0f, 0.0f, 0.0f, 1.0f);
 
 //our GL and GLSL variables
 
@@ -77,8 +94,8 @@ GLint positionLocation; //GLuint that we'll fill in with the location of the `po
 GLint colorLocation; //GLuint that we'll fill in with the location of the `color` attribute in the GLSL
 GLint normalLocation;
 
-GLint rotateMatrixLocation; //GLuint that we'll fill in with the location of the `rotateMatrix` variable in the GLSL
-GLint textureSamplerLocation; 
+GLint modelMatrixLocation;
+GLint lightPositionLocation;
 
 GLuint vertexBufferObject;
 GLuint vao;
@@ -261,13 +278,15 @@ void initializeProgram()
 		exit(1);
 	}
 	
-	rotateMatrixLocation = glGetUniformLocation(theProgram, "rotateMatrix");
+	modelMatrixLocation = glGetUniformLocation(theProgram, "modelMatrix");
+	lightPositionLocation = glGetUniformLocation(theProgram, "lightPosition");
 	
 	//Error check Uniforms
-	if (rotateMatrixLocation < 0 || textureSamplerLocation < 0)
+	if (modelMatrixLocation < 0 || lightPositionLocation < 0)
 	{
 		cout << "GLSL getUniformeLocation failed." << std::endl;
-		cout << "rotateMatrixLocation= " << rotateMatrixLocation << std::endl;
+		cout << "modelMatrixLocation= " << modelMatrixLocation << std::endl;
+		cout << "lightPositionLocation= " << lightPositionLocation << std::endl;
 		SDL_Quit();
 		exit(1);
 	}
@@ -287,39 +306,11 @@ void initializeVertexBuffer()
 	cout << "positionBufferObject created OK! GLUint is: " << vertexBufferObject << std::endl;
 }
 
-void initializeTexturesAndSamplers()
-{
-	SDL_Surface* image = SDL_LoadBMP("assets/hello.bmp");
-	if (image == NULL)
-	{
-		cout << "iamge loading (for texture) failed." << std::endl;
-		SDL_Quit();
-		exit(1);
-	}
-
-	glEnable(GL_TEXTURE_2D); //enable 2D texturing
-	glGenTextures(1, &textureID); //generate a texture ID and store it
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, image->format->BytesPerPixel, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	SDL_FreeSurface(image);
-
-
-	cout << "texture created OK! GLUint is: " << textureID << std::endl;
-
-}
-
-
 void loadAssets()
 {
 	initializeProgram(); //create GLSL Shaders, link into a GLSL program
 
 	initializeVertexBuffer(); //load data into a vertex buffer
-
-	initializeTexturesAndSamplers();
 
 	glGenVertexArrays(1, &vao); //create a Vertex Array Object
 	glBindVertexArray(vao); //make the VAO active
@@ -343,12 +334,12 @@ void updateSimulation(double simLength) //update simulation with an amount of ti
 	//calculate the amount of rotate for this timestep
 	float rotate = (float)simLength * rotateSpeed; //simlength is a double for precision, but rotateSpeedVector in a vector of float, alternatively use glm::dvec3
 
-	//modify the rotateMatrix with the rotate, as a rotate, around the z-axis
+	//modify the modelMatrix with the rotate, as a rotate, around the z-axis
 	const glm::vec3 unitX = glm::vec3(1, 0, 0);
 	const glm::vec3 unitY = glm::vec3(0, 1, 0);
 	const glm::vec3 unitZ = glm::vec3(0, 0, 1);
 	const glm::vec3 unit45 = glm::normalize(glm::vec3(0, 1, 1));
-	rotateMatrix = glm::rotate(rotateMatrix, rotate, unit45);
+	modelMatrix = glm::rotate(modelMatrix, rotate, unit45);
 }
 
 void render()
@@ -356,8 +347,10 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //uploaed the rotateMatrix to the appropriate uniform location
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix)); //uploaed the modelMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
+
+	glUniform4fv(lightPositionLocation, 1, glm::value_ptr(lightPosition)); //uploads the lightPosition
 
 	int s = sizeof(cubeWithColorAndNormals);
 	size_t colorData = 0 + sizeof(GL_FLOAT) * 4 * 36; //0 plus number of bytes for position
@@ -372,7 +365,6 @@ void render()
 	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorData); //define **how** values are reader from positionBufferObject in Attrib 1
 	glVertexAttribPointer(normalLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)normalData); //define **how** values are reader from positionBufferObject in Attrib 1
 
-	//glVertexAttribP
 	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
 
 	glDisableVertexAttribArray(0); //cleanup
