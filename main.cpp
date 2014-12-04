@@ -253,7 +253,7 @@ void initializeProgram()
 	vertexUVLocation = glGetAttribLocation(theProgram, "vertexUV");
 
 	//Error check Attributes
-	if (positionLocation < 0 || colorLocation < 0 || colorLocation < 0)
+	if (positionLocation < 0 || vertexUVLocation < 0)
 	{
 		cout << "GLSL getAttributeLocation failed." << std::endl;
 		cout << "positionLocation= " << positionLocation << std::endl;
