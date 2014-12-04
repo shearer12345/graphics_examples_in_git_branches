@@ -58,12 +58,9 @@ const std::string strFragmentShader(
 	"smooth in vec4 theColor;\n"
 	"smooth in vec2 UV;\n"
 	"out vec4 outputColor;\n"
-	"uniform sampler2D textureSampler;\n"
 	"void main()\n"
 	"{\n"
-	"   outputColor.rgb = texture(textureSampler, UV).rgb;\n"
-	"   outputColor.a = 1.0;\n"
-	"   outputColor = theColor;\n"
+	"   outputColor = vec4(UV, 0.0, 1.0);\n"
     "}\n"
 	);
 
@@ -81,14 +78,14 @@ float rotateSpeed = 1.0f; //rate of change of the rotate - in radians per second
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
 GLint positionLocation; //GLuint that we'll fill in with the location of the `position` attribute in the GLSL
 GLint colorLocation; //GLuint that we'll fill in with the location of the `color` attribute in the GLSL
+GLint vertexUVLocation;
+
 GLint rotateMatrixLocation; //GLuint that we'll fill in with the location of the `rotateMatrix` variable in the GLSL
-GLint textureSamplerLocation;
 
 GLuint vertexBufferObject;
 GLuint vao;
 
 GLuint texture;
-GLuint sampler;
 
 // end Global Variables
 /////////////////////////
@@ -253,8 +250,38 @@ void initializeProgram()
 
 	positionLocation = glGetAttribLocation(theProgram, "position");
 	colorLocation = glGetAttribLocation(theProgram, "color");
+	vertexUVLocation = glGetAttribLocation(theProgram, "vertexUV");
+
+	//Error check Attributes
+	if (positionLocation < 0 || colorLocation < 0 || colorLocation < 0)
+	{
+		cout << "GLSL getAttributeLocation failed." << std::endl;
+		cout << "positionLocation= " << positionLocation << std::endl;
+		cout << "colorLocation= " << colorLocation << std::endl;
+		cout << "vertexUVLocation= " << vertexUVLocation << std::endl;
+		SDL_Quit();
+		exit(1);
+	}
+	else {
+		cout << "GLSL program creation OK! GLUint is: " << theProgram << std::endl;
+	}
+	
 	rotateMatrixLocation = glGetUniformLocation(theProgram, "rotateMatrix");
-	textureSamplerLocation = glGetUniformLocation(theProgram, "textureSampler");
+
+	//Error check Uniforms
+	if (rotateMatrixLocation < 0 )
+	{
+		cout << "GLSL getUniformeLocation failed." << std::endl;
+		cout << "rotateMatrixLocation= " << rotateMatrixLocation << std::endl;
+		SDL_Quit();
+		exit(1);
+	}
+	else {
+		cout << "GLSL program creation OK! GLUint is: " << theProgram << std::endl;
+	}
+
+
+
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
@@ -269,42 +296,12 @@ void initializeVertexBuffer()
 	cout << "positionBufferObject created OK! GLUint is: " << vertexBufferObject << std::endl;
 }
 
-void initializeTexturesAndSamplers()
-{
-	SDL_Surface* image = SDL_LoadBMP("assets/hello.bmp");
-	if (image == NULL)
-	{
-		cout << "iamge loading (for texture) failed." << std::endl;
-		SDL_Quit();
-		exit(1);
-	}
-
-	glEnable(GL_TEXTURE_2D); //enable 2D texturing
-	glGenTextures(1, &texture); //generate a texture ID and store it
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, image->format->BytesPerPixel, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
-
-
-	glGenSamplers(1, &sampler);
-
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	SDL_FreeSurface(image);
-
-
-	cout << "texture created OK! GLUint is: " << texture << std::endl;
-
-}
 
 void loadAssets()
 {
 	initializeProgram(); //create GLSL Shaders, link into a GLSL program
 
 	initializeVertexBuffer(); //load data into a vertex buffer
-
-	initializeTexturesAndSamplers();
 
 	glGenVertexArrays(1, &vao); //create a Vertex Array Object
 	glBindVertexArray(vao); //make the VAO active
@@ -344,16 +341,19 @@ void render()
 	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //uploaed the rotateMatrix to the appropriate uniform location
 	           // upload only one matrix, and don't transpose it
 
+	int s = sizeof(cubeWithColorAndTexturesCoordinates);
 	size_t colorData = 0 + sizeof(GL_FLOAT) * 4 * 36; //0 plus number of bytes for position
 	size_t textureData = colorData + sizeof(GL_FLOAT) * 4 * 36; //colorDate plus number of bytes for color
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
 
 	glEnableVertexAttribArray(positionLocation);
     glEnableVertexAttribArray(colorLocation);
-	glEnableVertexAttribArray(textureSamplerLocation);
+	glEnableVertexAttribArray(vertexUVLocation);
 
 	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
 	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorData); //define **how** values are reader from positionBufferObject in Attrib 1
+	glVertexAttribPointer(vertexUVLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)textureData); //define **how** values are reader from positionBufferObject in Attrib 1
+
 	//glVertexAttribP
 	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
 
