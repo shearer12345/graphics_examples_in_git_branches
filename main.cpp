@@ -28,10 +28,9 @@ SDL_GLContext context; //the SDL_GLContext
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
 #ifdef OPENGL_VERSION_3_1
-	"#version 140\n"
-#endif
-#ifdef OPENGL_VERSION_3_3
-	"#version 140\n"
+	"#version 130\n"
+#elif OPENGL_VERSION_3_3
+	"#version 330\n"
 #endif
 	"in vec4 position;\n"
 	"in vec4 color;\n"
@@ -50,10 +49,9 @@ const std::string strVertexShader(
 //string holding the **source** of our fragment shader, to save loading from a file
 const std::string strFragmentShader(
 #ifdef OPENGL_VERSION_3_1
-	"#version 140\n"
-#endif
-#ifdef OPENGL_VERSION_3_3
-	"#version 140\n"
+	"#version 130\n"
+#elif OPENGL_VERSION_3_3
+	"#version 330\n"
 #endif
 	"smooth in vec4 theColor;\n"
 	"smooth in vec2 UV;\n"
@@ -62,6 +60,7 @@ const std::string strFragmentShader(
 	"void main()\n"
 	"{\n"
 	"   outputColor = texture(textureSampler, UV);\n"
+    "   outputColor.a = 1.0;\n"
     "}\n"
 	);
 
@@ -82,7 +81,7 @@ GLint colorLocation; //GLuint that we'll fill in with the location of the `color
 GLint vertexUVLocation;
 
 GLint rotateMatrixLocation; //GLuint that we'll fill in with the location of the `rotateMatrix` variable in the GLSL
-GLint textureSamplerLocation; 
+GLint textureSamplerLocation;
 
 GLuint vertexBufferObject;
 GLuint vao;
@@ -127,20 +126,21 @@ void createWindow()
 void setGLAttributes()
 {
 	#ifdef OPENGL_VERSION_3_1
-		cout << "Built for OpenGL Version 3.1" << endl;
 		// set the opengl context version
 		int major = 3;
-		int minor = 1;
+		int minor = 0;
 	#endif
 	#ifdef OPENGL_VERSION_3_3
-		cout << "Built for OpenGL Version 3.3" << endl;
 		// set the opengl context version
 		int major = 3;
 		int minor = 3;
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); //core profile
 	#endif
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); //core profile
+    cout << "Built for OpenGL Version " << major << "." << minor << endl;
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major); 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
+    
 	cout << "Set OpenGL context to version " << major << "." << minor << " OK!\n";
 }
 
@@ -154,6 +154,10 @@ void createContext()
 		exit(1);
 	}
 	cout << "Created OpenGL context OK!\n";
+    int major, minor;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+	cout << "Got an OpenGL context of " << major <<"." << minor << endl;
 }
 
 void initGlew()
@@ -169,6 +173,15 @@ void initGlew()
 	else {
 		cout << "GLEW Init OK!\n";
 	}
+
+	cout << "----------------------------------------------------------------" << endl;
+    cout << "Graphics Successfully Initialized" << endl;
+    cout << "OpenGL Info" << endl;
+    cout << "    Version: " << glGetString(GL_VERSION) << endl;
+    cout << "     Vendor: " << glGetString(GL_VENDOR) << endl;
+    cout << "   Renderer: " << glGetString(GL_RENDERER) << endl;
+    cout << "    Shading: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+    cout << "----------------------------------------------------------------" << endl;
 }
 
 GLuint createShader(GLenum eShaderType, const std::string &strShaderFile)
@@ -264,7 +277,7 @@ void initializeProgram()
 		SDL_Quit();
 		exit(1);
 	}
-	
+
 	rotateMatrixLocation = glGetUniformLocation(theProgram, "rotateMatrix");
 	textureSamplerLocation = glGetUniformLocation(theProgram, "textureSampler");
 
@@ -298,7 +311,7 @@ void initializeTexturesAndSamplers()
 	SDL_Surface* image = SDL_LoadBMP("assets/hello.bmp");
 	if (image == NULL)
 	{
-		cout << "iamge loading (for texture) failed." << std::endl;
+		cout << "image loading (for texture) failed." << std::endl;
 		SDL_Quit();
 		exit(1);
 	}
@@ -362,8 +375,7 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //uploaed the rotateMatrix to the appropriate uniform location
-	           // upload only one matrix, and don't transpose it
+	glUniformMatrix4fv(rotateMatrixLocation, 1, GL_FALSE, glm::value_ptr(rotateMatrix)); //upload the rotateMatrix to the appropriate uniform location
 
 	int s = sizeof(cubeWithColorAndTexturesCoordinates);
 	size_t colorData = 0 + sizeof(GL_FLOAT) * 4 * 36; //0 plus number of bytes for position
@@ -371,20 +383,17 @@ void render()
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject); //bind positionBufferObject
 
 	glEnableVertexAttribArray(positionLocation);
-    glEnableVertexAttribArray(colorLocation);
 	glEnableVertexAttribArray(vertexUVLocation);
 
-	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
-	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorData); //define **how** values are reader from positionBufferObject in Attrib 1
-	glVertexAttribPointer(vertexUVLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)textureData); //define **how** values are reader from positionBufferObject in Attrib 1
+	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(vertexUVLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)textureData);
 
 	glUniform1i(textureSamplerLocation, 0); //make texture unit 0 feed our textureSampler
 	glActiveTexture(GL_TEXTURE0); //make texture unit 0 the active texture unit (which texture unit subsequent texture state calls will	affect)
-	
+
 	glBindTexture(GL_TEXTURE_2D, textureID); //make our texture object feed the active texture unit
 
-	//glVertexAttribP
-	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	glDisableVertexAttribArray(0); //cleanup
 	glUseProgram(0); //clean up
@@ -407,7 +416,7 @@ int main( int argc, char* args[] )
 	setGLAttributes();
 	createContext();
 	initGlew();
-
+    glViewport(0,0, 600, 600);
 
 	//load stuff from files
 	//- usually do just once
