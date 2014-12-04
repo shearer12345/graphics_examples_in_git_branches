@@ -57,10 +57,11 @@ const std::string strFragmentShader(
 #endif
 	"smooth in vec4 theColor;\n"
 	"smooth in vec2 UV;\n"
+	"uniform sampler2D textureSampler;\n"
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
-	"   outputColor = vec4(UV, 0.0, 1.0);\n"
+	"   outputColor = texture(textureSampler, UV);\n"
     "}\n"
 	);
 
@@ -81,11 +82,12 @@ GLint colorLocation; //GLuint that we'll fill in with the location of the `color
 GLint vertexUVLocation;
 
 GLint rotateMatrixLocation; //GLuint that we'll fill in with the location of the `rotateMatrix` variable in the GLSL
+GLint textureSamplerLocation; 
 
 GLuint vertexBufferObject;
 GLuint vao;
 
-GLuint texture;
+GLuint textureID;
 
 // end Global Variables
 /////////////////////////
@@ -262,24 +264,19 @@ void initializeProgram()
 		SDL_Quit();
 		exit(1);
 	}
-	else {
-		cout << "GLSL program creation OK! GLUint is: " << theProgram << std::endl;
-	}
 	
 	rotateMatrixLocation = glGetUniformLocation(theProgram, "rotateMatrix");
+	textureSamplerLocation = glGetUniformLocation(theProgram, "textureSampler");
 
 	//Error check Uniforms
-	if (rotateMatrixLocation < 0 )
+	if (rotateMatrixLocation < 0 || textureSamplerLocation < 0)
 	{
 		cout << "GLSL getUniformeLocation failed." << std::endl;
 		cout << "rotateMatrixLocation= " << rotateMatrixLocation << std::endl;
+		cout << "textureSamplerLocation= " << textureSamplerLocation << std::endl;
 		SDL_Quit();
 		exit(1);
 	}
-	else {
-		cout << "GLSL program creation OK! GLUint is: " << theProgram << std::endl;
-	}
-
 
 
 	//clean up shaders (we don't need them anymore as they are no in theProgram
@@ -296,12 +293,39 @@ void initializeVertexBuffer()
 	cout << "positionBufferObject created OK! GLUint is: " << vertexBufferObject << std::endl;
 }
 
+void initializeTexturesAndSamplers()
+{
+	SDL_Surface* image = SDL_LoadBMP("assets/hello.bmp");
+	if (image == NULL)
+	{
+		cout << "iamge loading (for texture) failed." << std::endl;
+		SDL_Quit();
+		exit(1);
+	}
+
+	glEnable(GL_TEXTURE_2D); //enable 2D texturing
+	glGenTextures(1, &textureID); //generate a texture ID and store it
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, image->format->BytesPerPixel, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	SDL_FreeSurface(image);
+
+
+	cout << "texture created OK! GLUint is: " << textureID << std::endl;
+
+}
+
 
 void loadAssets()
 {
 	initializeProgram(); //create GLSL Shaders, link into a GLSL program
 
 	initializeVertexBuffer(); //load data into a vertex buffer
+
+	initializeTexturesAndSamplers();
 
 	glGenVertexArrays(1, &vao); //create a Vertex Array Object
 	glBindVertexArray(vao); //make the VAO active
@@ -353,6 +377,11 @@ void render()
 	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
 	glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (void*)colorData); //define **how** values are reader from positionBufferObject in Attrib 1
 	glVertexAttribPointer(vertexUVLocation, 2, GL_FLOAT, GL_FALSE, 0, (void*)textureData); //define **how** values are reader from positionBufferObject in Attrib 1
+
+	glUniform1i(textureSamplerLocation, 0); //make texture unit 0 feed our textureSampler
+	glActiveTexture(GL_TEXTURE0); //make texture unit 0 the active texture unit (which texture unit subsequent texture state calls will	affect)
+	
+	glBindTexture(GL_TEXTURE_2D, textureID); //make our texture object feed the active texture unit
 
 	//glVertexAttribP
 	glDrawArrays(GL_TRIANGLES, 0, 36); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
