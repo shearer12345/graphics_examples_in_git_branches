@@ -4,7 +4,6 @@
 
 #include <GL/glew.h>
 #include <SDL.h>
-#include <glm/glm.hpp>
 
 using namespace std;
 
@@ -23,12 +22,11 @@ const std::string strVertexShader(
 	#ifdef OPENGL_VERSION_3_3
 		"#version 140\n"
 	#endif
-	"in vec4 position;\n"
-	"uniform vec2 offset;\n"
+	"in vec3 position;\n"
 	"void main()\n"
 	"{\n"
-	"   gl_Position = position;\n"
-	"   gl_Position.xy += offset;\n"
+	"   gl_Position.xyz = position;\n"
+	"   gl_Position.w = 1.0;\n"
 	"}\n"
 	);
 
@@ -43,7 +41,7 @@ const std::string strFragmentShader(
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
-	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+	"   outputColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);\n"
 	"}\n"
 	);
 
@@ -51,23 +49,24 @@ const std::string strFragmentShader(
 //our variables
 bool done = false;
 
-const float vertexPositions[] = {
-	0.0f, 0.5f, 0.0f, 1.0f,
-	-0.4330127f, -0.25f, 0.0f, 1.0f,
-	0.4330127f, -0.25f, 0.0f, 1.0f,
+struct Vertex
+{
+	GLfloat x, y, z;
+	//float nx, ny, nz;
+	//float u, v;
+
+	//Constructor
+	Vertex(GLfloat p_x, GLfloat p_y, GLfloat p_z)
+		: x(p_x), y(p_y), z(p_z)
+	{ }
 };
 
-//the offset we'll pass to the GLSL
-double offsetX = -0.5; //using different values from CPU and static GLSL examples, to make it clear this is working
-double offsetY = -0.5; //NOTE: we could use an array and pass the pointer, to be simpler & more efficent
-double offsetXSpeed = 0.2; //rate of change of offsetX in units per second
-double offsetYSpeed = 0.2; //rate of change of offsetY in units per second
+std::vector<Vertex> vertices;
 
 //our GL and GLSL variables
 
 GLuint theProgram; //GLuint that we'll fill in to refer to the GLSL program (only have 1 at this point)
 GLint positionLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
-GLint offsetLocation; //GLuint that we'll fill in with the location of the `offset` variable in the GLSL
 
 GLuint positionBufferObject;
 GLuint vao;
@@ -234,19 +233,62 @@ void initializeProgram()
 	}
 
 	positionLocation = glGetAttribLocation(theProgram, "position");
-	offsetLocation = glGetUniformLocation(theProgram, "offset");
+	
 	//clean up shaders (we don't need them anymore as they are no in theProgram
 	for_each(shaderList.begin(), shaderList.end(), glDeleteShader);
 }
 
 void initializeVertexBuffer()
 {
-	glGenBuffers(1, &positionBufferObject);
 
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
+	//Procedurally generate some triangles
+
+	//change the next 4 variables for interesting stuff
+	float blockCount = 25;
+	float blockWidth = 1.0f;
+	float blockHeight = 1.0f;
+	float portionOfBlockWidth = 2.0f;
+
+	float i_scale = blockWidth / blockCount;
+	float j_scale = blockHeight / blockCount;
+	float i_scaleByFour = i_scale / (portionOfBlockWidth);
+	float j_scaleByFour = j_scale / portionOfBlockWidth;
+	//cout << "i_scale, j_scale:" << i_scale << ", " << j_scale << endl;
+
+	for (float i = -blockWidth / 2.0f; i <  (blockWidth / 2.0f ); i += i_scale)
+	{
+
+		for (float j = -blockHeight/2.0f; j < (blockHeight / 2.0f); j += j_scale)
+		{
+			//cout << "i, j: " << i << ", " << j << endl;
+			vertices.emplace_back(i, j, 0.0f);
+
+			//cout << "i, j: " << i-i_scaleByFour << ", " << j-j_scaleByFour << endl;
+			vertices.emplace_back(i + i_scaleByFour, j - j_scaleByFour, 0.0f);
+
+			//cout << "i, j: " << i+i_scaleByFour << ", " << j-j_scaleByFour << endl << endl;
+			vertices.emplace_back(i - i_scaleByFour, j - j_scaleByFour, 0.0f);
+		}
+	}
+
+	//vertices.emplace_back(-0.5, -0.5, 0.0f); //manual testing
+	//vertices.emplace_back(-0.625, -0.625, 0.0f);
+	//vertices.emplace_back(-0.375, -0.625, 0.0f);
+
+	cout << "vertices is of size: " << vertices.size() << endl;
+
+	//Load vertices to GL
+	if (!vertices.empty())
+	{
+		glGenBuffers(1, &positionBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+		int verticesByteLength = sizeof(Vertex) * vertices.size();
+		cout << "vertices ByteLength is: " << verticesByteLength << endl;
+		glBufferData(GL_ARRAY_BUFFER, verticesByteLength, &vertices.front(), GL_STATIC_DRAW); //load the data to GL
+		cout << "positionBufferObject created OK! GLUint is: " << positionBufferObject << std::endl;
+	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	cout << "positionBufferObject created OK! GLUint is: " << positionBufferObject << std::endl;
+	
 }
 
 void loadAssets()
@@ -264,8 +306,7 @@ void loadAssets()
 
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
 {
-	offsetX += offsetXSpeed * simLength;
-	offsetY += offsetYSpeed * simLength;
+	; // do nothing
 }
 
 void render()
@@ -273,17 +314,16 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniform2f(offsetLocation, offsetX, offsetY);
-
-
+	//none here
+	
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
 
 	glEnableVertexAttribArray(positionLocation); //this 0 corresponds to the location = 0 in the GLSL for the vertex shader.
 		//more generically, use glGetAttribLocation() after GLSL linking to obtain the assigned attribute location.
 
-	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
+	glVertexAttribPointer(positionLocation, 3, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
 
-	glDrawArrays(GL_TRIANGLES, 0, 3); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+	glDrawArrays(GL_TRIANGLES, 0, 3 * vertices.size()); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
 
 	glDisableVertexAttribArray(0); //cleanup
 	glUseProgram(0); //clean up
