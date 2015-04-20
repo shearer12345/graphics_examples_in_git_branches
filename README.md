@@ -1,5 +1,13 @@
 #Learning 3D computer graphics in OpenGL
 
+- guide: https://github.com/batiste/sdl2-opengl-es
+- OR https://github.com/Grumbel/rpi-opengl
+  - https://github.com/Grumbel/rpi-opengl
+    - https://github.com/Grumbel/rpi-opengl/blob/master/sdl2_opengl.cpp - looks good
+- dependencies: sudo apt-get install libgles2-mesa-dev
+
+##
+
 - A series of examples each as a git branch
 
 - Build Status of master branch - [![Build Status](https://travis-ci.org/shearer12345/graphics_examples_in_git_branches.svg?branch=master)](https://travis-ci.org/shearer12345/graphics_examples_in_git_branches)
