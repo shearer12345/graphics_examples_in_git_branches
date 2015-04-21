@@ -4,6 +4,7 @@
 - OR https://github.com/Grumbel/rpi-opengl
   - https://github.com/Grumbel/rpi-opengl
     - https://github.com/Grumbel/rpi-opengl/blob/master/sdl2_opengl.cpp - looks good
+- OR http://jonmacey.blogspot.co.uk/2014/03/using-emscripten-to-port-ngl-to-web.html?m=1
 - dependencies: sudo apt-get install libgles2-mesa-dev
 
 ##
