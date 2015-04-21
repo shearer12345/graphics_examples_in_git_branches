@@ -346,13 +346,14 @@ int main( int argc, char* args[] )
 	setGLAttributes();
 	createContext();
 	initGlew();
-
+	SDL_GL_SwapWindow(win);; //present the frame buffer to the display (swapBuffers)
 
 	//load stuff from files
 	//- usually do just once
 	loadAssets();
 
-
+	SDL_GL_SwapWindow(win);; //present the frame buffer to the display (swapBuffers)
+	
 	while (!done && (SDL_GetTicks() < 5000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
 		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
 	{
