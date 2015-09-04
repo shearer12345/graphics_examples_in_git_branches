@@ -1,3 +1,13 @@
+#define STRING2(x) #x
+#define STRING(x) STRING2(x)
+
+#pragma message("__cplusplus version is : " STRING(__cplusplus))
+
+#if __cplusplus < 201103L
+  #error This library needs at least a C++11 compliant compiler
+#endif
+
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

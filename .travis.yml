@@ -3,8 +3,8 @@ language: cpp
 compiler:
   - gcc
  
-before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+before_install: 
+  - sudo add-apt-repository --yes "ppa:ubuntu-toolchain-r/test"
   - sudo add-apt-repository --yes "ppa:codegear/release"
   - sudo add-apt-repository --yes "ppa:zoogie/sdl2-snapshots"
   - sudo apt-get update
@@ -14,9 +14,11 @@ before_install:
   - sudo apt-get --yes install premake4
   - sudo apt-get --yes install libsdl2-dev
   - sudo apt-get --yes install libglew-dev
-  
+
 before_script:
   - premake4 gmake
+  - gcc --version
+  - g++ --version
   
 script:
   - make 
