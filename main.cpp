@@ -5,13 +5,6 @@
 #include <GL/glew.h>
 #include <SDL.h>
 
-#define GLM_FORCE_RADIANS //force glm to use radians //must do **before** including GLM headers
-//NOTE: GLSL uses radians, so will do the same, for consistency
-
-#include <glm/glm.hpp> //include the main glm header
-#include <glm/gtc/matrix_transform.hpp> //include functions to ease the calculation of the view and projection matrices
-#include <glm/gtc/type_ptr.hpp> //include functionality for converting a matrix object into a float array for usage in OpenGL
-
 using namespace std;
 
 /////////////////////
@@ -23,12 +16,7 @@ SDL_GLContext context; //the SDL_GLContext
 
 //string holding the **source** of our vertex shader, to save loading from a file
 const std::string strVertexShader(
-	#ifdef OPENGL_VERSION_3_1
-		"#version 140\n"
-	#endif
-	#ifdef OPENGL_VERSION_3_3
-		"#version 140\n"
-	#endif
+	"#version 330\n"
 	"in vec4 position;\n"
 	"uniform vec2 offset;\n"
 	"void main()\n"
@@ -40,12 +28,7 @@ const std::string strVertexShader(
 
 //string holding the **source** of our fragment shader, to save loading from a file
 const std::string strFragmentShader(
-	#ifdef OPENGL_VERSION_3_1
-		"#version 140\n"
-	#endif
-	#ifdef OPENGL_VERSION_3_3
-		"#version 140\n"
-	#endif
+	"#version 330\n"
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
@@ -115,20 +98,12 @@ void createWindow()
 
 void setGLAttributes()
 {
-	#ifdef OPENGL_VERSION_3_1
-		cout << "Built for OpenGL Version 3.1" << endl;
-		// set the opengl context version
-		int major = 3;
-		int minor = 1;
-	#endif
-	#ifdef OPENGL_VERSION_3_3
-		cout << "Built for OpenGL Version 3.3" << endl;
-		// set the opengl context version
-		int major = 3;
-		int minor = 3;
-	#endif
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
+	cout << "Built for OpenGL Version 3.3" << endl; //ahttps://en.wikipedia.org/wiki/OpenGL_Shading_Language#Versions
+	// set the opengl context version
+	int major = 3;
+	int minor = 3;
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); //core profile
 	cout << "Set OpenGL context to version " << major << "." << minor << " OK!\n";
 }
@@ -312,14 +287,15 @@ int main( int argc, char* args[] )
 	setGLAttributes();
 	createContext();
 	initGlew();
-
+	glViewport(0,0,600,600);
+    SDL_GL_SwapWindow(win); //just force a swap, to make the trace clearer
 
 	//load stuff from files
 	//- usually do just once
 	loadAssets();
 
 
-	while (!done && (SDL_GetTicks() < 5000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
+	while (!done && (SDL_GetTicks() < 5000000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
 		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
 	{
 		//GET INPUT HERE - PLACEHOLDER
@@ -327,7 +303,8 @@ int main( int argc, char* args[] )
 		updateSimulation(0.02); //call update simulation with an amount of time to simulate for (in seconds)
 		  //WARNING - we are always updating by a constant amount of time. This should be tied to how long has elapsed
 		    // see, for example, http://headerphile.blogspot.co.uk/2014/07/part-9-no-more-delays.html
-
+        glViewport(0,0,600,600);
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		render(); //RENDER HERE - PLACEHOLDER
