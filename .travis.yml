@@ -5,18 +5,19 @@ compiler:
  
 before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo add-apt-repository --yes "ppa:codegear/release"
   - sudo add-apt-repository --yes "ppa:zoogie/sdl2-snapshots"
   - sudo apt-get update
   - sudo apt-get install g++-4.8
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
-  - sudo apt-get --yes install premake4
   - sudo apt-get --yes install libsdl2-dev
   - sudo apt-get --yes install libglew-dev
+  - wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha5/premake-5.0.0-alpha5-linux.tar.gz
+  - tar -xvf premake-5.0.0-alpha5-linux.tar.gz 
+  - sudo mv premake5 /usr/local/bin/
   
 before_script:
-  - premake4 gmake
+  - premake5 gmake
   
 script:
   - make 
