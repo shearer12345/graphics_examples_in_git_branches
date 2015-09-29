@@ -16,6 +16,7 @@ before_install:
   - tar -xvf premake-5.0.0-alpha5-linux.tar.gz 
   - sudo mv premake5 /usr/local/bin/
   - ls /lib/x86_64-linux-gnu/libc.*
+  - dpkg -s libc6
   
 before_script:
   - premake5 gmake
