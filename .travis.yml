@@ -7,7 +7,7 @@ before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo add-apt-repository --yes "ppa:zoogie/sdl2-snapshots"
   - sudo apt-get update
-  - sudo apt-get install g++-4.8 libc6
+  - sudo apt-get --yes install build-essential g++-4.8 libc6 libstdc++6
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
   - sudo apt-get --yes install libsdl2-dev
