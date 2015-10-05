@@ -15,42 +15,40 @@ SDL_Window *win; //pointer to the SDL_Window
 SDL_GLContext context; //the SDL_GLContext
 
 //string holding the **source** of our vertex shader, to save loading from a file
-const std::string strVertexShader(
-	"#version 330\n"
-	"in vec4 position;\n"
-	"uniform vec2 offset;\n"
-	"void main()\n"
-	"{\n"
-	"   gl_Position = position;\n"
-	"   gl_Position.xy += offset;\n"
-	"}\n"
-	);
+const std::string strVertexShader = R"(
+	#version 330
+	in vec4 position;
+	uniform vec2 offset;
+	void main()
+	{
+	   gl_Position = position;
+	   gl_Position.xy += offset;
+	}
+)";
 
 //string holding the **source** of our fragment shader, to save loading from a file
-const std::string strFragmentShader(
-	"#version 330\n"
-	"out vec4 outputColor;\n"
-	"void main()\n"
-	"{\n"
-	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
-	"}\n"
-	);
+const std::string strFragmentShader = R"(
+	#version 330
+	out vec4 outputColor;
+	void main()
+	{
+	   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+)";
 
 
 //our variables
 bool done = false;
 
-const float vertexPositions[] = {
+const GLfloat vertexPositions[] = {
 	0.0f, 0.5f, 0.0f, 1.0f,
 	-0.4330127f, -0.25f, 0.0f, 1.0f,
 	0.4330127f, -0.25f, 0.0f, 1.0f,
 };
 
 //the offset we'll pass to the GLSL
-double offsetX = -0.5; //using different values from CPU and static GLSL examples, to make it clear this is working
-double offsetY = -0.5; //NOTE: we could use an array and pass the pointer, to be simpler & more efficent
-double offsetXSpeed = 0.2; //rate of change of offsetX in units per second
-double offsetYSpeed = 0.2; //rate of change of offsetY in units per second
+GLfloat offset[] = { -0.5, -0.5 }; //using different values from CPU and static GLSL examples, to make it clear this is working
+GLfloat offsetVelocity[] = { 0.2, 0.2 }; //rate of change of offset in units per second
 
 //our GL and GLSL variables
 
@@ -105,11 +103,13 @@ void setGLAttributes()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE); //core profile
-	cout << "Set OpenGL context to version " << major << "." << minor << " OK!\n";
+	cout << "Set OpenGL context to versicreate remote branchon " << major << "." << minor << " OK!\n";
 }
 
 void createContext()
 {
+	setGLAttributes();
+
 	context = SDL_GL_CreateContext(win);
 	if (context == nullptr){
 		SDL_DestroyWindow(win);
@@ -138,6 +138,7 @@ void initGlew()
 GLuint createShader(GLenum eShaderType, const std::string &strShaderFile)
 {
 	GLuint shader = glCreateShader(eShaderType);
+	//error check
 	const char *strFileData = strShaderFile.c_str();
 	glShaderSource(shader, 1, &strFileData, NULL);
 
@@ -232,21 +233,86 @@ void initializeVertexBuffer()
 
 void loadAssets()
 {
-	initializeProgram(); //create GLSL Shaders, link into a GLSL program
+	initializeProgram(); //create GLSL Shaders, link into a GLSL program, and get IDs of attributes and variables
 
 	initializeVertexBuffer(); //load data into a vertex buffer
-
-	glGenVertexArrays(1, &vao); //create a Vertex Array Object
-	glBindVertexArray(vao); //make the VAO active
-	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
 
 	cout << "Loaded Assets OK!\n";
 }
 
+void setupVAO()
+{
+	glGenVertexArrays(1, &vao); //create a Vertex Array Object
+	cout << "Vertex Array Object created OK! GLUint is: " << vao << std::endl;
+
+	glBindVertexArray(vao); //make the just created VAO the active one
+
+		glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject 
+
+		glEnableVertexAttribArray(positionLocation); //enable attribute at index positionLocation
+
+		glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //specify that position data contains four floats per vertex, and goes into attribute index positionLocation
+
+	glBindVertexArray(0); //unbind the VAO so we can't change it 
+
+	//cleanup
+	glDisableVertexAttribArray(positionLocation); //disable vertex attribute at index positionLocation
+	glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind array buffer
+
+}
+
+void handleInput()
+{
+	//Event-based input handling
+	//The underlying OS is event-based, so **each** key-up or key-down (for example)
+	//generates an event.
+	//  - https://wiki.libsdl.org/SDL_PollEvent
+	//In some scenarios we want to catch **ALL** the events, not just to present state
+	//  - for instance, if taking keyboard input the user might key-down two keys during a frame
+	//    - we want to catch based, and know the order
+	//  - or the user might key-down and key-up the same within a frame, and we still want something to happen (e.g. jump)
+	//  - the alternative is to Poll the current state with SDL_GetKeyboardState
+
+	SDL_Event event; //somewhere to store an event
+
+	//NOTE: there may be multiple events per frame
+	while (SDL_PollEvent(&event)) //loop until SDL_PollEvent returns 0 (meaning no more events)
+	{ 
+		switch (event.type)
+		{
+		case SDL_QUIT:
+			done = true; //set donecreate remote branch flag if SDL wants to quit (i.e. if the OS has triggered a close event,
+							//  - such as window close, or SIGINT
+			break;
+
+			//keydown handling - we should to the opposite on key-up for direction controls (generally)
+		case SDL_KEYDOWN:
+			//Keydown can fire repeatable if key-repeat is on.
+			//  - the repeat flag is set on the keyboard event, if this is a repeat event
+			//  - in our case, we're going to ignore repeat events
+			//  - https://wiki.libsdl.org/SDL_KeyboardEvent
+			if (!event.key.repeat)
+				switch (event.key.keysym.sym)
+				{
+					//hit escape to exit
+					case SDLK_ESCAPE: done = true;
+				}
+			break;
+		}
+	}
+}
+
 void updateSimulation(double simLength) //update simulation with an amount of time to simulate for (in seconds)
 {
-	offsetX += offsetXSpeed * simLength;
-	offsetY += offsetYSpeed * simLength;
+	offset[0] += offsetVelocity[0] * simLength;
+	offset[1] += offsetVelocity[1] * simLength;
+}
+
+void preRender()
+{
+	glViewport(0, 0, 600, 600); //set viewpoint
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f); //set clear colour
+	glClear(GL_COLOR_BUFFER_BIT); //clear the window (technical the scissor box bounds)
 }
 
 void render()
@@ -254,22 +320,25 @@ void render()
 	glUseProgram(theProgram); //installs the program object specified by program as part of current rendering state
 
 	//load data to GLSL that **may** have changed
-	glUniform2f(offsetLocation, offsetX, offsetY);
+	glUniform2f(offsetLocation, offset[0], offset[1]);
+		//alternatively, use glUnivform2fv
+		//glUniform2fv(offsetLocation, 1, offset); //Note: the count is 1, because we are setting a single uniform vec2 - https://www.opengl.org/wiki/GLSL_:_common_mistakes#How_to_use_glUniform
 
-
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject); //bind positionBufferObject
-
-	glEnableVertexAttribArray(positionLocation); //this 0 corresponds to the location = 0 in the GLSL for the vertex shader.
-		//more generically, use glGetAttribLocation() after GLSL linking to obtain the assigned attribute location.
-
-	glVertexAttribPointer(positionLocation, 4, GL_FLOAT, GL_FALSE, 0, 0); //define **how** values are reader from positionBufferObject in Attrib 0
-
+	glBindVertexArray(vao);
+	
 	glDrawArrays(GL_TRIANGLES, 0, 3); //Draw something, using Triangles, and 3 vertices - i.e. one lonely triangle
+	
+	glBindVertexArray(0);
 
-	glDisableVertexAttribArray(0); //cleanup
 	glUseProgram(0); //clean up
 
 }
+
+void postRender()
+{
+	SDL_GL_SwapWindow(win);; //present the frame buffer to the display (swapBuffers)
+}
+
 void cleanUp()
 {
 	SDL_GL_DeleteContext(context);
@@ -284,34 +353,40 @@ int main( int argc, char* args[] )
 	//- do just once
 	initialise();
 	createWindow();
-	setGLAttributes();
+	
 	createContext();
+	
 	initGlew();
-	glViewport(0,0,600,600);
+
+	glViewport(0,0,600,600); //should check what the actual window res is?
+
     SDL_GL_SwapWindow(win); //just force a swap, to make the trace clearer
 
 	//load stuff from files
 	//- usually do just once
+	//- create shaders
 	loadAssets();
 
+	//setup a GL object (a VertexArrayObject) that stores how to access data, from where
+	setupVAO();
+	
 
-	while (!done && (SDL_GetTicks() < 5000000)) //LOOP FROM HERE, for 2000ms (or if done flag is set)
-		//WARNING: SDL_GetTicks is only accurate to milliseconds, use SDL_GetPerformanceCounter and SDL_GetPerformanceFrequency for higher accuracy
+
+	while (!done) //loop until done flag is set)
 	{
-		//GET INPUT HERE - PLACEHOLDER
+		handleInput();
 
 		updateSimulation(0.02); //call update simulation with an amount of time to simulate for (in seconds)
 		  //WARNING - we are always updating by a constant amount of time. This should be tied to how long has elapsed
 		    // see, for example, http://headerphile.blogspot.co.uk/2014/07/part-9-no-more-delays.html
-        glViewport(0,0,600,600);
-        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+        
+		preRender();
 
 		render(); //RENDER HERE - PLACEHOLDER
 
-		SDL_GL_SwapWindow(win);; //present the frame buffer to the display (swapBuffers)
-
-	} //LOOP TO HERE
+		postRender();
+		
+	} 
 
 	//cleanup and exit
 	cleanUp();
@@ -319,3 +394,4 @@ int main( int argc, char* args[] )
 
 	return 0;
 }
+
