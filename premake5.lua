@@ -67,3 +67,10 @@ solution "graphicsByExample"
          defines { "NDEBUG" }
          optimize "On"  
 
+      configuration "windows"
+         postbuildcommands { 
+                              --
+                              --copy dlls. Must escape the backslashes - https://github.com/premake/premake-core/wiki/postbuildcommands
+                              --"xcopy ..\\graphics_dependencies\\glew\\bin\\Release\\Win32\\glew32.dll .\\bin\\  /d",
+                              --"xcopy ..\\graphics_dependencies\\SDL2\\lib\\win32\\SDL2.dll .\\bin\\  /d",
+                           }
