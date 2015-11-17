@@ -36,8 +36,8 @@ const std::string strVertexShader(
 	"in vec4 color;\n"
 	"in vec2 vertexUV;\n"
 	"uniform mat4 rotateMatrix;\n"
-	"smooth out vec4 theColor;\n"
-	"smooth out vec2 UV;\n"
+	"out vec4 theColor;\n"
+	"out vec2 UV;\n"
 	"void main()\n"
 	"{\n"
 	"   gl_Position = rotateMatrix * position;\n" //multiple the position by the transformation matrix (rotate)
@@ -53,8 +53,8 @@ const std::string strFragmentShader(
 #elif OPENGL_VERSION_3_3
 	"#version 330\n"
 #endif
-	"smooth in vec4 theColor;\n"
-	"smooth in vec2 UV;\n"
+	"in vec4 theColor;\n"
+	"in vec2 UV;\n"
 	"uniform sampler2D textureSampler;\n"
 	"out vec4 outputColor;\n"
 	"void main()\n"
@@ -138,9 +138,9 @@ void setGLAttributes()
 	#endif
     cout << "Built for OpenGL Version " << major << "." << minor << endl;
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major); 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
-    
+
 	cout << "Set OpenGL context to version " << major << "." << minor << " OK!\n";
 }
 
@@ -308,7 +308,7 @@ void initializeVertexBuffer()
 
 void initializeTexturesAndSamplers()
 {
-	SDL_Surface* image = SDL_LoadBMP("assets/hello.bmp");
+	SDL_Surface* image = SDL_LoadBMP("hello.bmp");
 	if (image == NULL)
 	{
 		cout << "image loading (for texture) failed." << std::endl;
@@ -321,7 +321,7 @@ void initializeTexturesAndSamplers()
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, image->format->BytesPerPixel, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->w, image->h, 0, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	SDL_FreeSurface(image);
